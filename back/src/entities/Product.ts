@@ -2,11 +2,9 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Order } from "./Order";
 import { Category } from "./Category";
 
 @Entity({ name: "products" })
@@ -28,6 +26,9 @@ export class Product {
 
   @Column()
   image: string;
+
+  @Column({ name: "is0ffer", default: false })
+  isOffer: boolean;
 
   @Column()
   categoryId: number;
