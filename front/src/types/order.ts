@@ -7,12 +7,24 @@ export interface OrderProduct {
   image: string;
   stock?: number;
   category?: Category;
-  quantity?: number;
+}
+
+export interface OrderItem {
+  id: number;
+  quantity: number;
+  product: OrderProduct;
 }
 
 export interface Order {
   id: number;
   status: string;
   date: string;
-  products: OrderProduct[];
+
+  subtotal: number;
+  shippingMethod: string;
+  shippingCost: number;
+  discount: number;
+  total: number;
+
+  items: OrderItem[];
 }

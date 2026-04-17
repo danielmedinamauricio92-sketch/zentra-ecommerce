@@ -1,11 +1,12 @@
-import { OrderProduct } from "@/types/order";
+import { GroupedOrderProduct } from "@/utils/pricing.utils";
 
 interface OrderProductRowProps {
-  product: OrderProduct;
+  product: GroupedOrderProduct;
 }
 
 export function OrderProductRow({ product }: OrderProductRowProps) {
-  const subtotal = Number(product.price ?? 0);
+  const unitPrice = Number(product.price ?? 0);
+  const subtotal = Number(product.subtotal ?? 0);
 
   return (
     <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -23,11 +24,11 @@ export function OrderProductRow({ product }: OrderProductRowProps) {
         </p>
 
         <p className="mt-1 text-sm text-slate-500">
-          Precio unitario: ${product.price.toLocaleString("es-AR")}
+          Precio unitario: ${unitPrice.toLocaleString("es-AR")}
         </p>
 
         <p className="mt-1 text-sm text-slate-500">
-          Cantidad: 1
+          Cantidad: {product.quantity ?? 0}
         </p>
       </div>
 

@@ -62,13 +62,6 @@ export default function DashboardView() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-medium text-slate-500">ID</p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
-                  {user.id}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Nombre</p>
                 <p className="mt-1 text-base font-semibold text-slate-900">
                   {user.name}
@@ -93,13 +86,6 @@ export default function DashboardView() {
                 <p className="text-sm font-medium text-slate-500">Teléfono</p>
                 <p className="mt-1 text-base font-semibold text-slate-900">
                   {user.phone}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-medium text-slate-500">Rol</p>
-                <p className="mt-1 text-base font-semibold text-slate-900">
-                  {user.role}
                 </p>
               </div>
             </div>

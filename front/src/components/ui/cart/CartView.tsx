@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
+import { calculateSummary } from "@/utils/pricing.utils";
 
 export default function CartView() {
   const { user } = useUser();
@@ -14,12 +15,12 @@ export default function CartView() {
     clearCart,
   } = useCart();
 
-  const total = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+  const { total } = calculateSummary(
+    cart,
+    (item) => item.price,
+    (item) => item.quantity,
     0
   );
-
-
 
   if (!user) {
     return (
@@ -166,7 +167,6 @@ export default function CartView() {
               );
             })}
 
-            
             <div className="flex items-center justify-between">
               <button
                 onClick={clearCart}
@@ -193,7 +193,6 @@ export default function CartView() {
               <span>Subtotal</span>
               <span>${total.toLocaleString("es-AR")}</span>
             </div>
-           
 
             <div className="mb-4 flex justify-between text-sm">
               <span>Envío</span>

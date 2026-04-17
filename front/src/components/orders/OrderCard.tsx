@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { Order } from "@/types/order";
 import { OrderProductRow } from "./OrderProductRow";
+import { GroupedOrderProduct } from "@/utils/pricing.utils";
 
 interface OrderCardProps {
   order: Order;
   index: number;
   reorderedId: number | null;
-  onBuyAgain: (orderId: number, products: Order["products"]) => void;
+  onBuyAgain: (orderId: number, items: Order["items"]) => void;
+  groupedProducts: GroupedOrderProduct[];
 }
 
 export function OrderCard({
@@ -14,13 +16,12 @@ export function OrderCard({
   index,
   reorderedId,
   onBuyAgain,
+  groupedProducts,
 }: OrderCardProps) {
-  const total = order.products.reduce(
-    (acc, product) => acc + Number(product.price ?? 0),
+  const totalUnits = order.items.reduce(
+    (acc, item) => acc + item.quantity,
     0
   );
-
-  const totalUnits = order.products.length;
 
   const isRecent = index === 0;
   const wasReordered = reorderedId === order.id;
@@ -37,7 +38,7 @@ export function OrderCard({
 
               {isRecent && (
                 <span className="inline-flex items-center rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
-                  Pedido reciente
+                  Reciente
                 </span>
               )}
             </div>
@@ -60,13 +61,13 @@ export function OrderCard({
                 Total
               </p>
               <p className="mt-1 text-lg font-bold text-slate-900">
-                ${total.toLocaleString("es-AR")}
+                ${order.total.toLocaleString("es-AR")}
               </p>
             </div>
 
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
               <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              {order.status}
+              Aprobado
             </span>
           </div>
         </div>
@@ -74,9 +75,28 @@ export function OrderCard({
 
       <div className="px-6 py-5">
         <div className="space-y-4">
-          {order.products.map((product) => (
+          {groupedProducts.map((product) => (
             <OrderProductRow key={product.id} product={product} />
           ))}
+        </div>
+
+        <div className="mt-6 space-y-2 border-t border-slate-200 pt-4 text-sm text-slate-600">
+          <div className="flex justify-between">
+            <span>Subtotal</span>
+            <span>${order.subtotal.toLocaleString("es-AR")}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span>Envío ({order.shippingMethod})</span>
+            <span>${order.shippingCost.toLocaleString("es-AR")}</span>
+          </div>
+
+          {order.discount > 0 && (
+            <div className="flex justify-between text-red-600">
+              <span>Descuento</span>
+              <span>-${order.discount.toLocaleString("es-AR")}</span>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
@@ -96,14 +116,14 @@ export function OrderCard({
 
             <button
               type="button"
-              onClick={() => onBuyAgain(order.id, order.products)}
+              onClick={() => onBuyAgain(order.id, order.items)}
               className={`inline-flex items-center justify-center rounded-full px-5 py-3 text-sm font-semibold transition ${
                 wasReordered
                   ? "bg-emerald-600 text-white hover:bg-emerald-700"
                   : "bg-slate-900 text-white hover:bg-slate-800"
               }`}
             >
-              {wasReordered ? "Agregado al carrito ✓" : "Repetir compra"}
+              {wasReordered ? "Agregado al carrito" : "Repetir compra"}
             </button>
           </div>
         </div>

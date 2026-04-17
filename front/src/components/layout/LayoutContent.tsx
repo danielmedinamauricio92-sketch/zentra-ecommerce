@@ -4,7 +4,6 @@ import { ReactNode } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Toast from "@/components/ui/Toast";
-import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 
 interface LayoutContentProps {
@@ -12,18 +11,10 @@ interface LayoutContentProps {
 }
 
 export default function LayoutContent({ children }: LayoutContentProps) {
-  const { toast: cartToast, setToast: setCartToast } = useCart();
-  const { toast: userToast, setToast: setUserToast } = useUser();
-
-  const activeToast = userToast.show ? userToast : cartToast;
+  const { toast, setToast } = useUser();
 
   const handleCloseToast = () => {
-    if (userToast.show) {
-      setUserToast({ show: false, message: "" });
-      return;
-    }
-
-    setCartToast({ show: false, message: "" });
+    setToast({ show: false, message: "" });
   };
 
   return (
@@ -39,8 +30,8 @@ export default function LayoutContent({ children }: LayoutContentProps) {
       <Footer />
 
       <Toast
-        message={activeToast.message}
-        show={activeToast.show}
+        message={toast.message}
+        show={toast.show}
         onClose={handleCloseToast}
       />
     </>

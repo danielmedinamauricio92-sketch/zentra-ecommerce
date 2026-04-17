@@ -4,9 +4,26 @@ import { catchedController } from "../utils/catchedController";
 
 export const createOrder = catchedController(
   async (req: Request, res: Response) => {
-    const { products } = req.body;
-    const userId = req.body.userId;
-    const newOrder = await createOrderService({ userId, products });
+    const {
+      userId,
+      products,
+      subtotal,
+      shippingMethod,
+      shippingCost,
+      discount,
+      total,
+    } = req.body;
+
+    const newOrder = await createOrderService({
+      userId,
+      products,
+      subtotal,
+      shippingMethod,
+      shippingCost,
+      discount,
+      total,
+    });
+
     res.send(newOrder);
   }
 );

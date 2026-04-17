@@ -10,14 +10,12 @@ interface ProductDetailViewProps {
 export default async function ProductDetailView({
   id,
 }: ProductDetailViewProps) {
-  const productId = Number(id);
+  const products = await getProducts();
+  const product = products.find((product) => product.id === Number(id));
 
-  if (Number.isNaN(productId)) {
+  if (Number.isNaN(Number(id))) {
     notFound();
   }
-
-  const products = await getProducts();
-  const product = products.find((item) => item.id === productId);
 
   if (!product) {
     return (
@@ -28,7 +26,7 @@ export default async function ProductDetailView({
           </h1>
 
           <p className="mb-6 text-slate-600">
-            El producto que buscás no existe o ya no está disponible.
+            El producto que buscás no existe o no está disponible.
           </p>
 
           <Link

@@ -13,11 +13,11 @@ export const categoryOrder = [
 ];
 
 export function getCategoryId(categoryName: string) {
-  return categoryName.toLowerCase().replace(/\s+/g, "-");
+  return categoryName.toLowerCase().replaceAll(" ", "-");
 }
 
 export function groupProductsByCategory(products: Product[]) {
-  return products.reduce<Record<string, Product[]>>((acc, product) => {
+  return products.reduce((acc: Record<string, Product[]>, product) => {
     const categoryName = product.category?.name || "Sin categoría";
 
     if (!acc[categoryName]) {
@@ -25,19 +25,28 @@ export function groupProductsByCategory(products: Product[]) {
     }
 
     acc[categoryName].push(product);
+
     return acc;
   }, {});
 }
 
 export function sortCategories(categories: string[]) {
   return [...categories].sort((a, b) => {
-    const indexA = categoryOrder.indexOf(a);
-    const indexB = categoryOrder.indexOf(b);
+    const aIndex = categoryOrder.indexOf(a);
+    const bIndex = categoryOrder.indexOf(b);
 
-    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
+    if (aIndex === -1 && bIndex === -1) {
+      return a.localeCompare(b);
+    }
 
-    return indexA - indexB;
+    if (aIndex === -1) {
+      return 1;
+    }
+
+    if (bIndex === -1) {
+      return -1;
+    }
+
+    return aIndex - bIndex;
   });
 }

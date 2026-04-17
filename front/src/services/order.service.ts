@@ -1,57 +1,73 @@
 import { Order } from "@/types/order";
+import { CartItem } from "@/types/cart-item";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+type CreateOrderData = {
+  token: string;
+  userId: number;
+  cart: CartItem[];
+  subtotal: number;
+  shippingMethod: string;
+  shippingCost: number;
+  discount: number;
+  total: number;
+};
 
 export async function getUserOrders(token: string): Promise<Order[]> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!apiUrl) {
-    throw new Error("NEXT_PUBLIC_API_URL no esta definida");
-  }
-
-  const response = await fetch(`${apiUrl}/users/orders`, {
-    method: "GET",
+  const res = await fetch(`${API_URL}/users/orders`, {
     headers: {
       "Content-Type": "application/json",
       Authorization: token,
     },
   });
 
-  if (!response.ok) {
-    throw new Error("No se pudieron cargar tus compras.");
+  if (!res.ok) {
+    throw new Error("No se pudieron cargar las compras");
   }
 
-  const data = await response.json();
+  const data = await res.json();
 
   if (!Array.isArray(data)) {
     return [];
   }
 
-  return [...data].reverse();
+  return data.reverse();
 }
 
-export async function createOrder(
-  token: string,
-  products: number[]
-): Promise<unknown> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!apiUrl) {
-    throw new Error("NEXT_PUBLIC_API_URL no esta definida");
-  }
-
-  const response = await fetch(`${apiUrl}/orders`, {
+export async function createOrder({
+  token,
+  userId,
+  cart,
+  subtotal,
+  shippingMethod,
+  shippingCost,
+  discount,
+  total,
+}: CreateOrderData) {
+  const res = await fetch(`${API_URL}/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: token,
     },
     body: JSON.stringify({
-      products,
+      userId,
+      products: cart.map((item) => ({
+        productId: item.id,
+        quantity: item.quantity,
+      })),
+      subtotal,
+      shippingMethod,
+      shippingCost,
+      discount,
+      total,
     }),
   });
 
-  const data = await response.json().catch(() => null);
+  const data = await res.json().catch(() => null);
 
-  if (!response.ok) {
+  if (!res.ok) {
     throw new Error(data?.message || "Error al crear la orden");
   }
 

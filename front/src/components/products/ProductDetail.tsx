@@ -24,7 +24,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     <section className="py-10 md:py-14">
       <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="relative flex min-h-[420px] items-center justify-center bg-slate-50 p-8 md:p-12">
+          <div className="relative flex min-h-105 items-center justify-center bg-slate-50 p-8 md:p-12">
             <div className="absolute left-6 top-6 z-10 flex flex-wrap gap-2">
               <span className="inline-flex items-center rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white shadow">
                 Producto destacado
@@ -126,7 +126,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   -
                 </button>
 
-                <span className="min-w-[40px] text-center text-lg font-semibold text-slate-900">
+                <span className="min-w-10 text-center text-lg font-semibold text-slate-900">
                   {quantity}
                 </span>
 

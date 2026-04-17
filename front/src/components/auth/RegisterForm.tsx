@@ -1,24 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser } from "@/services/auth.service";
 import { useUser } from "@/context/UserContext";
 import { RegisterData } from "@/types/auth";
+import {
+  RegisterFormErrors,
+  RegisterFormValues,
+} from "@/types/forms";
+import {
+  validateRegisterForm,
+  isRegisterFormComplete,
+} from "@/utils/registerValidation";
 
 export default function RegisterForm() {
   const router = useRouter();
   const { setToast } = useUser();
   const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
+  const [form, setForm] = useState<RegisterFormValues>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    address: "",
+    phone: "",
+  });
 
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<RegisterFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const isFormComplete = isRegisterFormComplete(form);
 
   useEffect(() => {
     return () => {
@@ -35,51 +51,57 @@ export default function RegisterForm() {
     });
   };
 
-  const validateForm = () => {
-    if (
-      !name.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !address.trim() ||
-      !phone.trim()
-    ) {
-      const message = "Todos los campos son obligatorios";
-      setError(message);
-      showToastMessage(message);
-      return false;
+  const handleChange = (field: keyof RegisterFormValues, value: string) => {
+    let nextValue = value;
+
+    if (field === "phone") {
+      nextValue = value.replace(/\D/g, "").slice(0, 15);
     }
 
-    if (!email.includes("@")) {
-      const message = "Email inválido";
-      setError(message);
-      showToastMessage(message);
-      return false;
-    }
+    setForm((prev) => ({
+      ...prev,
+      [field]: nextValue,
+    }));
 
-    if (password.trim().length < 4) {
-      const message = "La contraseña debe tener al menos 4 caracteres";
-      setError(message);
-      showToastMessage(message);
-      return false;
-    }
-
-    return true;
+    setErrors((prev) => ({
+      ...prev,
+      [field]: undefined,
+      general: undefined,
+    }));
   };
 
-  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
+  const handleRegisterClick = () => {
+    if (isLoading) return;
+
+    if (!isFormComplete) {
+      showToastMessage("Completá todos los campos obligatorios.");
+    }
+  };
+
+  const handleSubmit = async (
+    e: React.SyntheticEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
-    setError("");
+    if (!isFormComplete) {
+      showToastMessage("Completá todos los campos obligatorios.");
+      return;
+    }
 
-    const isValid = validateForm();
-    if (!isValid) return;
+    const formErrors = validateRegisterForm(form);
+    setErrors(formErrors);
+
+    if (Object.keys(formErrors).length > 0) {
+      showToastMessage("Revisá los campos marcados en rojo.");
+      return;
+    }
 
     const registerData: RegisterData = {
-      name: name.trim(),
-      email: email.trim(),
-      password: password.trim(),
-      address: address.trim(),
-      phone: phone.trim(),
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password.trim(),
+      address: form.address.trim(),
+      phone: form.phone.trim(),
     };
 
     try {
@@ -87,117 +109,176 @@ export default function RegisterForm() {
 
       await registerUser(registerData);
 
-      showToastMessage("Registro exitoso 🚀");
+      showToastMessage("Registro exitoso. Redirigiendo...");
 
       redirectTimeout.current = setTimeout(() => {
         router.push("/login");
       }, 1200);
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Error al registrarse";
+        err instanceof Error
+          ? err.message
+          : "No se pudo completar el registro.";
 
-      setError(message);
+      setErrors({ general: message });
       showToastMessage(message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const inputClassName = (hasError?: string) =>
+    `w-full rounded-xl border bg-white px-4 py-3 text-slate-900 outline-none transition ${
+      hasError
+        ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+        : "border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+    } ${isLoading ? "cursor-not-allowed opacity-70" : ""}`;
+
+  const submitButtonClassName = `mt-2 w-full rounded-full px-6 py-3.5 font-bold text-white shadow-lg transition
+    ${
+      !isFormComplete && !isLoading
+        ? "bg-blue-300 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+    }
+    ${isLoading ? "opacity-70 cursor-not-allowed" : ""}
+  `;
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+
       <div>
-        <label
-          htmlFor="name"
-          className="mb-2 block text-sm font-semibold text-slate-900"
-        >
-          Nombre
+        <label className="mb-2 block text-sm font-semibold text-slate-900">
+          Nombre *
         </label>
         <input
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+          value={form.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          disabled={isLoading}
           placeholder="Tu nombre"
-          autoComplete="name"
+          className={inputClassName(errors.name)}
         />
+        {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name}</p>}
       </div>
 
+    
       <div>
-        <label
-          htmlFor="email"
-          className="mb-2 block text-sm font-semibold text-slate-900"
-        >
-          Email
+        <label className="mb-2 block text-sm font-semibold text-slate-900">
+          Email *
         </label>
         <input
-          id="email"
           type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-          placeholder="Tu email"
-          autoComplete="email"
+          value={form.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          disabled={isLoading}
+          placeholder="nombre@email.com"
+          className={inputClassName(errors.email)}
         />
+        {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="mb-2 block text-sm font-semibold text-slate-900"
-        >
-          Contraseña
+        <label className="mb-2 block text-sm font-semibold text-slate-900">
+          Contraseña *
         </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-          placeholder="********"
-          autoComplete="new-password"
-        />
+
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            value={form.password}
+            onChange={(e) => handleChange("password", e.target.value)}
+            disabled={isLoading}
+            placeholder="Mínimo 8 caracteres"
+            className={`${inputClassName(errors.password)} pr-20`}
+          />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-600 hover:text-slate-900"
+          >
+            {showPassword ? "Ocultar" : "Ver"}
+          </button>
+        </div>
+
+        {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
       </div>
 
+     
       <div>
-        <label
-          htmlFor="address"
-          className="mb-2 block text-sm font-semibold text-slate-900"
-        >
-          Dirección
+        <label className="mb-2 block text-sm font-semibold text-slate-900">
+          Confirmar contraseña *
         </label>
-        <input
-          id="address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-          placeholder="Tu dirección"
-          autoComplete="street-address"
-        />
+
+        <div className="relative">
+          <input
+            type={showConfirmPassword ? "text" : "password"}
+            value={form.confirmPassword}
+            onChange={(e) =>
+              handleChange("confirmPassword", e.target.value)
+            }
+            disabled={isLoading}
+            placeholder="Repetí tu contraseña"
+            className={`${inputClassName(errors.confirmPassword)} pr-20`}
+          />
+
+          <button
+            type="button"
+            onClick={() =>
+              setShowConfirmPassword((prev) => !prev)
+            }
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-600 hover:text-slate-900"
+          >
+            {showConfirmPassword ? "Ocultar" : "Ver"}
+          </button>
+        </div>
+
+        {errors.confirmPassword && (
+          <p className="mt-2 text-sm text-red-600">
+            {errors.confirmPassword}
+          </p>
+        )}
       </div>
 
+   
       <div>
-        <label
-          htmlFor="phone"
-          className="mb-2 block text-sm font-semibold text-slate-900"
-        >
-          Teléfono
+        <label className="mb-2 block text-sm font-semibold text-slate-900">
+          Dirección *
         </label>
         <input
-          id="phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-          placeholder="Tu teléfono"
-          autoComplete="tel"
+          value={form.address}
+          onChange={(e) => handleChange("address", e.target.value)}
+          disabled={isLoading}
+          placeholder="Calle 123"
+          className={inputClassName(errors.address)}
         />
+        {errors.address && <p className="mt-2 text-sm text-red-600">{errors.address}</p>}
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+     
+      <div>
+        <label className="mb-2 block text-sm font-semibold text-slate-900">
+          Teléfono *
+        </label>
+        <input
+          value={form.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          disabled={isLoading}
+          placeholder="Solo números"
+          className={inputClassName(errors.phone)}
+        />
+        {errors.phone && <p className="mt-2 text-sm text-red-600">{errors.phone}</p>}
+      </div>
 
+      {errors.general && (
+        <p className="text-sm text-red-600">{errors.general}</p>
+      )}
+
+      
       <button
         type="submit"
+        onClick={handleRegisterClick}
         disabled={isLoading}
-        className="mt-2 w-full rounded-full bg-blue-600 px-6 py-3.5 font-bold text-white shadow-lg transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+        className={submitButtonClassName}
       >
         {isLoading ? "Registrando..." : "Registrarse"}
       </button>

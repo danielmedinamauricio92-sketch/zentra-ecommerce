@@ -17,12 +17,8 @@ export default function OffersView() {
         setError("");
         const data = await getProducts();
         setProducts(data);
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("No se pudieron cargar las ofertas.");
-        }
+      } catch (err: any) {
+        setError(err?.message || "No se pudieron cargar las ofertas.");
       } finally {
         setLoading(false);
       }

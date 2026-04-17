@@ -11,11 +11,6 @@ import { useUser } from "@/context/UserContext";
 import { Product } from "@/types/product";
 import { CartItem } from "@/types/cart-item";
 
-interface ToastState {
-  show: boolean;
-  message: string;
-}
-
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product) => void;
@@ -23,24 +18,21 @@ interface CartContextType {
   clearCart: () => void;
   increaseQuantity: (id: number) => void;
   decreaseQuantity: (id: number) => void;
-  toast: ToastState;
-  setToast: (toast: ToastState) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { user, isHydrated: isUserHydrated } = useUser();
+  const { user, isHydrated: isUserHydrated, setToast } = useUser();
 
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [toast, setToast] = useState<ToastState>({
-    show: false,
-    message: "",
-  });
   const [isHydrated, setIsHydrated] = useState(false);
 
   const showToast = (message: string) => {
-    setToast({ show: true, message });
+    setToast({
+      show: true,
+      message,
+    });
   };
 
   useEffect(() => {
@@ -57,13 +49,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const storedCart = localStorage.getItem("cart");
 
       if (storedCart) {
-        const parsedCart: CartItem[] = JSON.parse(storedCart);
-        setCart(parsedCart);
+        setCart(JSON.parse(storedCart));
       } else {
         setCart([]);
       }
     } catch (error) {
-      console.error("Error al leer el carrito desde localStorage:", error);
+      console.error("Error al recuperar el carrito:", error);
       setCart([]);
     } finally {
       setIsHydrated(true);
@@ -79,7 +70,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart, isHydrated, user, isUserHydrated]);
+  }, [cart, user, isHydrated, isUserHydrated]);
 
   const addToCart = (product: Product) => {
     if (!user) {
@@ -92,17 +83,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const existingItem = cart.find((item) => item.id === product.id);
+    const itemInCart = cart.find((item) => item.id === product.id);
 
-    if (existingItem && existingItem.quantity >= product.stock) {
+    if (itemInCart && itemInCart.quantity >= product.stock) {
       showToast("No podés agregar más unidades de las disponibles");
       return;
     }
 
     setCart((prev) => {
-      const itemExists = prev.find((item) => item.id === product.id);
+      const exists = prev.find((item) => item.id === product.id);
 
-      if (itemExists) {
+      if (exists) {
         return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
@@ -110,19 +101,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
       }
 
-      const newItem: CartItem = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        stock: product.stock,
-        quantity: 1,
-      };
-
-      return [...prev, newItem];
+      return [
+        ...prev,
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          stock: product.stock,
+          quantity: 1,
+        },
+      ];
     });
 
-    showToast("Producto agregado al carrito 🛒");
+    showToast("Producto agregado al carrito");
   };
 
   const removeFromCart = (id: number) => {
@@ -132,7 +124,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     setCart((prev) => prev.filter((item) => item.id !== id));
-    showToast("Producto eliminado ❌");
+    showToast("Producto eliminado del carrito");
   };
 
   const clearCart = () => {
@@ -142,7 +134,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     setCart([]);
-    showToast("Carrito vaciado 🧹");
+    showToast("Carrito vaciado");
   };
 
   const increaseQuantity = (id: number) => {
@@ -151,7 +143,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const item = cart.find((product) => product.id === id);
+    const item = cart.find((item) => item.id === id);
 
     if (!item) return;
 
@@ -161,10 +153,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
 
     setCart((prev) =>
-      prev.map((product) =>
-        product.id === id
-          ? { ...product, quantity: product.quantity + 1 }
-          : product
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
       )
     );
   };
@@ -193,8 +183,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         clearCart,
         increaseQuantity,
         decreaseQuantity,
-        toast,
-        setToast,
       }}
     >
       {children}
@@ -206,7 +194,7 @@ export function useCart() {
   const context = useContext(CartContext);
 
   if (!context) {
-    throw new Error("useCart must be used within a CartProvider");
+    throw new Error("useCart debe usarse dentro de CartProvider");
   }
 
   return context;

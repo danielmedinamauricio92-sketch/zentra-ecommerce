@@ -1,18 +1,14 @@
 import { Product } from "@/types/product";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function getProducts(): Promise<Product[]> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-  if (!apiUrl) {
-    throw new Error("NEXT_PUBLIC_API_URL no esta definida");
-  }
-
-  const res = await fetch(`${apiUrl}/products`, {
+  const res = await fetch(`${API_URL}/products`, {
     cache: "no-store",
   });
 
   if (!res.ok) {
-    throw new Error("No se pudieron obtener los productos");
+    throw new Error("Error al obtener productos");
   }
 
   return res.json();

@@ -3,11 +3,13 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   ReactNode,
-  useEffect,
 } from "react";
 import { User } from "@/types/user";
+import { Order } from "@/types/order";
+import { getUserOrders } from "@/services/order.service";
 
 interface ToastState {
   show: boolean;
@@ -22,6 +24,7 @@ interface UserContextType {
   setToast: (toast: ToastState) => void;
   login: (user: User, token: string) => void;
   logout: () => void;
+  orders: Order[];
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -34,6 +37,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     show: false,
     message: "",
   });
+  const [orders, setOrders] = useState<Order[]>([]);
 
   const showToast = (message: string) => {
     setToast({
@@ -43,42 +47,56 @@ export function UserProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
 
+    try {
       if (storedUser && storedToken) {
-        const parsedUser: User = JSON.parse(storedUser);
-        setUser(parsedUser);
+        setUser(JSON.parse(storedUser));
         setToken(storedToken);
       }
     } catch (error) {
       console.error("Error al recuperar la sesión:", error);
       localStorage.removeItem("user");
       localStorage.removeItem("token");
+      setOrders([]);
     } finally {
       setIsHydrated(true);
     }
   }, []);
 
-  const login = (userData: User, userToken: string) => {
-    setUser(userData);
-    setToken(userToken);
+  useEffect(() => {
+    if (isHydrated && user && token) {
+      getUserOrders(token)
+        .then((orders) => {
+          setOrders(orders);
+        })
+        .catch((error) => {
+          console.error("Error al validar la sesión con el backend:", error);
+          logout();
+        });
+    }
+  }, [isHydrated, user, token]);
 
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", userToken);
+  const login = (user: User, token: string) => {
+    setUser(user);
+    setToken(token);
 
-    showToast("Sesión iniciada correctamente ✅");
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", token);
+
+    showToast("Sesión iniciada correctamente");
   };
 
   const logout = () => {
     setUser(null);
     setToken(null);
+    setOrders([]);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     localStorage.removeItem("cart");
 
-    showToast("Sesión cerrada correctamente 👋");
+    showToast("Sesión cerrada correctamente");
   };
 
   return (
@@ -91,6 +109,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         setToast,
         login,
         logout,
+        orders,
       }}
     >
       {children}
@@ -102,7 +121,7 @@ export function useUser() {
   const context = useContext(UserContext);
 
   if (!context) {
-    throw new Error("useUser must be used within a UserProvider");
+    throw new Error("useUser debe usarse dentro de UserProvider");
   }
 
   return context;

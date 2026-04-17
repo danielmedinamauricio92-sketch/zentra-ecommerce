@@ -5,15 +5,15 @@ import Link from "next/link";
 export function ZentraBanner() {
   return (
     <section className="w-full px-4 md:px-6 mt-4 md:mt-6">
-      <div className="relative overflow-hidden rounded-3xl min-h-[420px] md:min-h-[440px] flex items-center">
+      <div className="relative overflow-hidden rounded-3xl min-h-105 md:min-h-110 flex items-center">
         <img
           src="/images/banner-zentra.png"
           alt="Banner principal de Zentra"
           className="absolute inset-0 w-full h-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050816]/88 via-[#0b1028]/58 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-[#050816]/88 via-[#0b1028]/58 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-transparent" />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-14">
           <div className="max-w-xl">

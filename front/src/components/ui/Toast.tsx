@@ -33,7 +33,7 @@ export default function Toast({ message, show, onClose }: ToastProps) {
 
   return (
     <div
-      className={`fixed right-6 top-24 z-[999] transition-all duration-300 ${
+      className={`fixed right-6 top-24 z-999 transition-all duration-300 ${
         visible
           ? "translate-y-0 opacity-100"
           : "-translate-y-4 opacity-0"

@@ -5,7 +5,6 @@ import { useCart } from "@/context/CartContext";
 import { useUser } from "@/context/UserContext";
 import { Order } from "@/types/order";
 import { Product } from "@/types/product";
-import { Category } from "@/types/category";
 import { getUserOrders } from "@/services/order.service";
 
 import { OrdersHeader } from "@/components/orders/OrdersHeader";
@@ -13,6 +12,8 @@ import { OrdersLoading } from "@/components/orders/OrdersLoading";
 import { OrdersError } from "@/components/orders/OrdersError";
 import { OrdersEmpty } from "@/components/orders/OrdersEmpty";
 import { OrderCard } from "@/components/orders/OrderCard";
+
+import { groupOrderProducts } from "@/utils/pricing.utils";
 
 export default function OrdersView() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -36,12 +37,8 @@ export default function OrdersView() {
 
         const data = await getUserOrders(token);
         setOrders(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Ocurrió un error al cargar tus compras.");
-        }
+      } catch (err: any) {
+        setError(err?.message || "Ocurrió un error al cargar tus compras.");
       } finally {
         setLoading(false);
       }
@@ -50,20 +47,17 @@ export default function OrdersView() {
     fetchOrders();
   }, [user, token]);
 
-  const handleBuyAgain = (orderId: number, products: Order["products"]) => {
-    products.forEach((product) => {
-      const productForCart: Product = {
-        ...product,
-        stock: product.stock ?? 1,
-        category:
-          product.category ??
-          ({
-            id: 0,
-            name: "Sin categoría",
-          } as Category),
-      };
+  const handleBuyAgain = (orderId: number, items: Order["items"]) => {
+    items.forEach((item) => {
+      for (let i = 0; i < item.quantity; i++) {
+        const productForCart: Product = {
+          ...item.product,
+          stock: item.product.stock ?? 1,
+          category: item.product.category ?? { id: 0, name: "Sin categoría" },
+        };
 
-      addToCart(productForCart);
+        addToCart(productForCart);
+      }
     });
 
     setReorderedId(orderId);
@@ -91,15 +85,20 @@ export default function OrdersView() {
 
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">
-          {orders.map((order, index) => (
-            <OrderCard
-              key={order.id}
-              order={order}
-              index={index}
-              reorderedId={reorderedId}
-              onBuyAgain={handleBuyAgain}
-            />
-          ))}
+          {orders.map((order, index) => {
+            const groupedProducts = groupOrderProducts(order.items);
+
+            return (
+              <OrderCard
+                key={order.id}
+                order={order}
+                index={index}
+                reorderedId={reorderedId}
+                onBuyAgain={handleBuyAgain}
+                groupedProducts={groupedProducts}
+              />
+            );
+          })}
         </div>
       </section>
     </>

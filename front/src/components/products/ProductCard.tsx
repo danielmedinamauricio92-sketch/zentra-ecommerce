@@ -11,11 +11,11 @@ export function ProductCard({ product }: ProductCardProps) {
       href={`/products/${product.id}`}
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl"
     >
-      <div className="mb-5 flex h-56 w-full items-center justify-center rounded-2xl border border-slate-100 bg-gradient-to-b from-slate-50 via-white to-slate-50 p-5">
+      <div className="mb-5 flex h-56 w-full items-center justify-center rounded-2xl border border-slate-100 bg-linear-to-b from-slate-50 via-white to-slate-50 p-5">
         <img
           src={product.image}
           alt={product.name}
-          className="max-h-[190px] max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+          className="max-h-47.5 max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </div>
 
@@ -27,7 +27,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
 
         <div className="mb-3">
-          <h2 className="min-h-[56px] line-clamp-2 text-lg font-semibold leading-snug text-slate-900 transition-colors duration-300 group-hover:text-blue-600 md:text-xl">
+          <h2 className="min-h-14 line-clamp-2 text-lg font-semibold leading-snug text-slate-900 transition-colors duration-300 group-hover:text-blue-600 md:text-xl">
             {product.name}
           </h2>
         </div>

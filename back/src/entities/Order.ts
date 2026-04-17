@@ -2,15 +2,12 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { User } from "./User";
-import { Product } from "./Product";
-
-// status: pending, approved, rejected
+import { OrderDetail } from "./OrderDetail";
 
 @Entity({ name: "orders" })
 export class Order {
@@ -23,11 +20,28 @@ export class Order {
   @Column()
   date: Date;
 
+  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  subtotal: number;
+
+  @Column({ default: "standard" })
+  shippingMethod: string;
+
+  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  shippingCost: number;
+
+  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  discount: number;
+
+  @Column("decimal", { precision: 10, scale: 2, default: 0 })
+  total: number;
+
   @ManyToOne(() => User, (user) => user.orders)
   @JoinColumn({ name: "userId" })
   user: User;
 
-  @ManyToMany(() => Product)
-  @JoinTable()
-  products: Product[];
+  @OneToMany(() => OrderDetail, (detail) => detail.order, {
+    cascade: true,
+    eager: true,
+  })
+  items: OrderDetail[];
 }
