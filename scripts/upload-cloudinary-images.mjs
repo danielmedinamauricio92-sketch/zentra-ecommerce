@@ -6,17 +6,27 @@ const rootDir = process.cwd();
 const imagesDir = path.join(rootDir, "front", "public", "images");
 const preloadFile = path.join(rootDir, "back", "src", "helpers", "preLoadProducts.ts");
 const outputFile = path.join(rootDir, "cloudinary-image-map.json");
+const uploadTimeoutMs = Number(process.env.CLOUDINARY_UPLOAD_TIMEOUT_MS || 120000);
+const uploadConcurrency = Number(process.env.CLOUDINARY_UPLOAD_CONCURRENCY || 4);
 
 const {
-  CLOUDINARY_CLOUD_NAME,
-  CLOUDINARY_API_KEY,
-  CLOUDINARY_API_SECRET,
+  CLOUDINARY_URL,
   CLOUDINARY_FOLDER = "zentra/products",
 } = process.env;
 
+let { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
+  process.env;
+
+if (CLOUDINARY_URL && (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET)) {
+  const cloudinaryUrl = new URL(CLOUDINARY_URL);
+  CLOUDINARY_API_KEY = decodeURIComponent(cloudinaryUrl.username);
+  CLOUDINARY_API_SECRET = decodeURIComponent(cloudinaryUrl.password);
+  CLOUDINARY_CLOUD_NAME = cloudinaryUrl.hostname;
+}
+
 if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
   console.error(
-    "Missing CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY or CLOUDINARY_API_SECRET."
+    "Missing CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET."
   );
   process.exit(1);
 }
@@ -74,13 +84,22 @@ async function uploadImage(fileName) {
   const bytes = await fs.readFile(filePath);
   formData.append("file", new Blob([bytes], { type: mimeType }), fileName);
 
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), uploadTimeoutMs);
+  let response;
+
+  try {
+    response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+        signal: controller.signal,
+      }
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const data = await response.json();
 
@@ -93,20 +112,55 @@ async function uploadImage(fileName) {
   return data.secure_url;
 }
 
+async function readExistingMap() {
+  try {
+    return JSON.parse(await fs.readFile(outputFile, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return {};
+    }
+
+    throw error;
+  }
+}
+
+async function runWithConcurrency(items, worker) {
+  const queue = [...items];
+  const workers = Array.from(
+    { length: Math.min(uploadConcurrency, queue.length) },
+    async () => {
+      while (queue.length > 0) {
+        const item = queue.shift();
+        await worker(item);
+      }
+    }
+  );
+
+  await Promise.all(workers);
+}
+
 const source = await fs.readFile(preloadFile, "utf8");
 const referencedImages = getReferencedImages(source);
-const imageMap = {};
+const imageMap = await readExistingMap();
 let nextSource = source;
+const pendingImages = referencedImages.filter((fileName) => !imageMap[`/images/${fileName}`]);
 
-console.log(`Uploading ${referencedImages.length} product images to Cloudinary...`);
+console.log(
+  `Uploading ${pendingImages.length} pending product images to Cloudinary (${referencedImages.length} total, concurrency ${uploadConcurrency})...`
+);
 
-for (const fileName of referencedImages) {
+await runWithConcurrency(pendingImages, async (fileName) => {
   const localPath = `/images/${fileName}`;
+  console.log(`Uploading ${localPath}...`);
   const secureUrl = await uploadImage(fileName);
 
   imageMap[localPath] = secureUrl;
-  nextSource = nextSource.replaceAll(`image: "${localPath}"`, `image: "${secureUrl}"`);
+  await fs.writeFile(outputFile, `${JSON.stringify(imageMap, null, 2)}\n`);
   console.log(`${localPath} -> ${secureUrl}`);
+});
+
+for (const [localPath, secureUrl] of Object.entries(imageMap)) {
+  nextSource = nextSource.replaceAll(`image: "${localPath}"`, `image: "${secureUrl}"`);
 }
 
 await fs.writeFile(preloadFile, nextSource);
