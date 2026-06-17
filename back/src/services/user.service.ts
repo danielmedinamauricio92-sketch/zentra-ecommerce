@@ -89,6 +89,28 @@ export const getUserByIdService = async (
   return toPublicUser(user);
 };
 
+export const updateUserProfileService = async (
+  userId: number,
+  profile: Partial<Pick<User, "name" | "address" | "phone">>
+): Promise<PublicUser> => {
+  const user = await UserRepository.findOneBy({ id: userId });
+
+  if (!user) throw new ClientError("User not found", 404);
+
+  const nextName = profile.name?.trim();
+  const nextAddress = profile.address?.trim();
+  const nextPhone = profile.phone?.trim();
+
+  if (nextName !== undefined) user.name = nextName;
+  if (nextAddress !== undefined) user.address = nextAddress;
+  if (nextPhone !== undefined) user.phone = nextPhone;
+
+  if (!user.name) throw new ClientError("Name is required");
+
+  const savedUser = await UserRepository.save(user);
+  return toPublicUser(savedUser);
+};
+
 export const getGoogleAuthUrlService = () => {
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
     throw new ClientError("Google login is not configured", 500);
@@ -162,8 +184,8 @@ export const loginWithGoogleService = async (
     user = UserRepository.create({
       name: googleUser.name,
       email: googleUser.email,
-      address: "Pendiente de completar",
-      phone: "Pendiente",
+      address: "",
+      phone: "",
       googleId: googleUser.id,
       avatar: googleUser.picture,
     });
@@ -182,5 +204,6 @@ export const loginWithGoogleService = async (
   };
 };
 
-export const getGoogleSuccessRedirect = () => `${FRONTEND_URL}/login?google=success`;
+export const getGoogleSuccessRedirect = () =>
+  `${FRONTEND_URL}/complete-profile?google=success`;
 export const getGoogleErrorRedirect = () => `${FRONTEND_URL}/login?google=error`;

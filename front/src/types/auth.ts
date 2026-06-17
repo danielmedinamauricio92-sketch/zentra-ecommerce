@@ -24,3 +24,9 @@ export type RegisterResponse = {
 export type LoginResponse = {
   user: User;
 };
+
+export type ProfileUpdateData = {
+  name: string;
+  address: string;
+  phone: string;
+};

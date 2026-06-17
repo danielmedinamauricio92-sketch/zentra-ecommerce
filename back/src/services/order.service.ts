@@ -4,6 +4,7 @@ import { OrderDetail } from "../entities/OrderDetail";
 import { AppDataSource } from "../config/dataSource";
 import { CartItem } from "../entities/CartItem";
 import { OrderRepository } from "../repositories/order.repository";
+import { Product } from "../entities/Product";
 import { ProductRepository } from "../repositories/product.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { ClientError } from "../utils/errors";
@@ -62,8 +63,14 @@ export const createOrderService = async (
         );
       }
 
-      product.stock -= item.quantity;
-      await manager.save(ProductRepository.target, product);
+      const nextStock = product.stock - item.quantity;
+      await manager
+        .createQueryBuilder()
+        .update(Product)
+        .set({ stock: nextStock })
+        .where("id = :id", { id: product.id })
+        .execute();
+      product.stock = nextStock;
 
       const orderDetail = manager.create(OrderDetail, {
         product,

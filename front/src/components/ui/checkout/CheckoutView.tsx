@@ -10,6 +10,7 @@ import CheckoutForm from "@/components/checkout/CheckoutForm";
 import CheckoutCartSummary from "@/components/checkout/CheckoutCartSummary";
 import CheckoutStatus from "@/components/checkout/CheckoutStatus";
 import { calculateSummary } from "@/utils/pricing.utils";
+import { isProfileComplete } from "@/utils/profile.utils";
 
 type CheckoutSubmitData = {
   name: string;
@@ -84,6 +85,11 @@ export default function CheckoutView() {
       return;
     }
 
+    if (!isProfileComplete(user)) {
+      router.push("/complete-profile");
+      return;
+    }
+
     if (cart.length === 0) {
       setError("Agregá productos al carrito antes de finalizar la compra.");
       return;
@@ -127,6 +133,27 @@ export default function CheckoutView() {
 
   if (!user) {
     return <CheckoutStatus type="redirecting" />;
+  }
+
+  if (!isProfileComplete(user)) {
+    return (
+      <section className="flex min-h-[calc(100vh-5rem)] items-center justify-center px-6">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+          <h1 className="text-2xl font-bold text-slate-900">
+            Completa tu perfil
+          </h1>
+          <p className="mt-3 text-slate-600">
+            Antes de finalizar la compra necesitamos tu direccion y telefono.
+          </p>
+          <Link
+            href="/complete-profile"
+            className="mt-6 inline-flex rounded-full bg-slate-900 px-6 py-3 font-semibold text-white"
+          >
+            Completar datos
+          </Link>
+        </div>
+      </section>
+    );
   }
 
   if (isSubmitting) {

@@ -24,6 +24,7 @@ interface UserContextType {
   toast: ToastState;
   setToast: (toast: ToastState) => void;
   login: (user: User) => void;
+  updateUser: (user: User) => void;
   logout: () => void;
   orders: Order[];
 }
@@ -49,6 +50,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const login = (user: User) => {
     setUser(user);
     showToast("Sesión iniciada correctamente");
+  };
+
+  const updateUser = (user: User) => {
+    setUser(user);
   };
 
   const logout = useCallback(() => {
@@ -93,6 +98,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         toast,
         setToast,
         login,
+        updateUser,
         logout,
         orders,
       }}

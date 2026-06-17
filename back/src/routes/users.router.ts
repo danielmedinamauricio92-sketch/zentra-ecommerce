@@ -8,6 +8,7 @@ import {
   logout,
   me,
   registerUser,
+  updateMe,
 } from "../controllers/user.controller";
 import checkLogin from "../middlewares/checkLogin.middleware";
 import { OrderRepository } from "../repositories/order.repository";
@@ -21,6 +22,8 @@ usersRouter.post("/login", validateUserLogin, login);
 usersRouter.post("/logout", logout);
 
 usersRouter.get("/me", checkLogin, me);
+
+usersRouter.patch("/me", checkLogin, updateMe);
 
 usersRouter.get("/google", googleLogin);
 

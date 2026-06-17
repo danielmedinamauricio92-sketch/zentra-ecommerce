@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ProfileForm from "@/components/profile/ProfileForm";
 import { useUser } from "@/context/UserContext";
+import { isProfileComplete } from "@/utils/profile.utils";
 
 export default function DashboardView() {
   const router = useRouter();
-  const { user, logout } = useUser();
+  const { user, logout, updateUser } = useUser();
 
   if (!user) {
     return (
@@ -60,6 +62,12 @@ export default function DashboardView() {
               Mis datos
             </h2>
 
+            {user && !isProfileComplete(user) && (
+              <p className="mb-5 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-700">
+                Completa tus datos para poder finalizar compras sin errores.
+              </p>
+            )}
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-sm font-medium text-slate-500">Nombre</p>
@@ -88,6 +96,17 @@ export default function DashboardView() {
                   {user.phone}
                 </p>
               </div>
+            </div>
+
+            <div className="mt-6 border-t border-slate-100 pt-6">
+              <h3 className="mb-4 text-lg font-semibold text-slate-900">
+                Editar datos
+              </h3>
+
+              <ProfileForm
+                user={user}
+                onSaved={(updatedUser) => updateUser(updatedUser)}
+              />
             </div>
           </section>
 

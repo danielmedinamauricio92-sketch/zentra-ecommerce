@@ -1,6 +1,7 @@
 import {
   LoginCredentials,
   LoginResponse,
+  ProfileUpdateData,
   RegisterData,
   RegisterResponse,
 } from "@/types/auth";
@@ -58,6 +59,27 @@ export async function getCurrentUser(): Promise<LoginResponse> {
 
   if (!res.ok) {
     throw new Error(data?.message || "No hay una sesión activa");
+  }
+
+  return data;
+}
+
+export async function updateUserProfile(
+  profile: ProfileUpdateData
+): Promise<LoginResponse> {
+  const res = await fetch(`${API_URL}/users/me`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(profile),
+    credentials: "include",
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(data?.message || "No se pudieron actualizar los datos");
   }
 
   return data;

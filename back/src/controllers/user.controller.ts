@@ -8,6 +8,7 @@ import {
   loginWithGoogleService,
   loginUserService,
   registerUserService,
+  updateUserProfileService,
 } from "../services/user.service";
 import { clearAuthCookie, setAuthCookie } from "../utils/authCookie";
 
@@ -39,6 +40,17 @@ export const login = catchedController(async (req: Request, res: Response) => {
 export const me = catchedController(async (req: Request, res: Response) => {
   const { userId } = req.body;
   const user = await getUserByIdService(userId);
+
+  res.status(200).send({ user });
+});
+
+export const updateMe = catchedController(async (req: Request, res: Response) => {
+  const { userId, name, address, phone } = req.body;
+  const user = await updateUserProfileService(userId, {
+    name,
+    address,
+    phone,
+  });
 
   res.status(200).send({ user });
 });
