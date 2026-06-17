@@ -46,14 +46,20 @@ export default function CheckoutForm({
   onSubmit,
   isSubmitting,
 }: Props) {
+  const [addressMode, setAddressMode] = useState<"profile" | "other">(
+    defaultValues.address ? "profile" : "other"
+  );
+  const [recipientMode, setRecipientMode] = useState<"self" | "other">("self");
   const [form, setForm] = useState<CheckoutFormValues>({
     name: defaultValues.name,
     email: defaultValues.email,
     address: defaultValues.address,
     recipientName: defaultValues.recipientName,
   });
-
   const [errors, setErrors] = useState<CheckoutFormErrors>({});
+
+  const inputClassName =
+    "w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900";
 
   const handleChange = (field: keyof CheckoutFormValues, value: string) => {
     setForm((prev) => ({
@@ -70,11 +76,20 @@ export default function CheckoutForm({
   const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const shippingAddress =
+      addressMode === "profile" ? defaultValues.address : form.address;
+    const recipientName =
+      recipientMode === "self" ? form.name : form.recipientName;
+
     const formErrors = validateCheckoutForm({
       name: form.name,
       email: form.email,
-      address: form.address,
+      address: shippingAddress,
     }) as CheckoutFormErrors;
+
+    if (recipientMode === "other" && !form.recipientName.trim()) {
+      formErrors.recipientName = "Ingresa el nombre de quien recibe.";
+    }
 
     setErrors(formErrors);
 
@@ -83,9 +98,9 @@ export default function CheckoutForm({
     onSubmit({
       name: form.name,
       email: form.email,
-      address: form.address,
+      address: shippingAddress,
       shippingMethod,
-      recipientName: form.recipientName,
+      recipientName,
     });
   };
 
@@ -103,7 +118,7 @@ export default function CheckoutForm({
           value={form.name}
           onChange={(e) => handleChange("name", e.target.value)}
           placeholder="Tu nombre"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
+          className={inputClassName}
         />
         {errors.name && (
           <p className="mt-2 text-sm font-medium text-red-600">
@@ -124,7 +139,7 @@ export default function CheckoutForm({
           value={form.email}
           onChange={(e) => handleChange("email", e.target.value)}
           placeholder="Tu email"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
+          className={inputClassName}
         />
         {errors.email && (
           <p className="mt-2 text-sm font-medium text-red-600">
@@ -133,20 +148,60 @@ export default function CheckoutForm({
         )}
       </div>
 
-      <div>
-        <label
-          htmlFor="checkout-address"
-          className="mb-2 block text-sm font-medium text-slate-700"
-        >
-          Dirección
-        </label>
-        <input
-          id="checkout-address"
-          value={form.address}
-          onChange={(e) => handleChange("address", e.target.value)}
-          placeholder="Tu dirección"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
-        />
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Entrega
+        </h3>
+
+        <div className="mt-4 grid gap-3">
+          <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4">
+            <input
+              type="radio"
+              checked={addressMode === "profile"}
+              onChange={() => setAddressMode("profile")}
+              className="mt-1"
+            />
+            <span>
+              <span className="block font-semibold text-slate-900">
+                Enviar a mi domicilio
+              </span>
+              <span className="mt-1 block text-sm text-slate-600">
+                {defaultValues.address || "No tenes una direccion guardada"}
+              </span>
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4">
+            <input
+              type="radio"
+              checked={addressMode === "other"}
+              onChange={() => setAddressMode("other")}
+              className="mt-1"
+            />
+            <span className="font-semibold text-slate-900">
+              Enviar a otra direccion
+            </span>
+          </label>
+        </div>
+
+        {addressMode === "other" && (
+          <div className="mt-4">
+            <label
+              htmlFor="checkout-address"
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Nueva direccion
+            </label>
+            <input
+              id="checkout-address"
+              value={form.address}
+              onChange={(e) => handleChange("address", e.target.value)}
+              placeholder="Calle, numero, piso o referencia"
+              className={inputClassName}
+            />
+          </div>
+        )}
+
         {errors.address && (
           <p className="mt-2 text-sm font-medium text-red-600">
             {errors.address}
@@ -154,20 +209,65 @@ export default function CheckoutForm({
         )}
       </div>
 
-      <div>
-        <label
-          htmlFor="checkout-recipient"
-          className="mb-2 block text-sm font-medium text-slate-700"
-        >
-          Enviar a
-        </label>
-        <input
-          id="checkout-recipient"
-          value={form.recipientName}
-          onChange={(e) => handleChange("recipientName", e.target.value)}
-          placeholder="Opcional: nombre de quien recibe"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
-        />
+      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Quien recibe
+        </h3>
+
+        <div className="mt-4 grid gap-3">
+          <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4">
+            <input
+              type="radio"
+              checked={recipientMode === "self"}
+              onChange={() => setRecipientMode("self")}
+              className="mt-1"
+            />
+            <span>
+              <span className="block font-semibold text-slate-900">
+                Recibo yo
+              </span>
+              <span className="mt-1 block text-sm text-slate-600">
+                {form.name}
+              </span>
+            </span>
+          </label>
+
+          <label className="flex cursor-pointer gap-3 rounded-xl border border-slate-200 bg-white p-4">
+            <input
+              type="radio"
+              checked={recipientMode === "other"}
+              onChange={() => setRecipientMode("other")}
+              className="mt-1"
+            />
+            <span className="font-semibold text-slate-900">
+              Lo recibe otra persona
+            </span>
+          </label>
+        </div>
+
+        {recipientMode === "other" && (
+          <div className="mt-4">
+            <label
+              htmlFor="checkout-recipient"
+              className="mb-2 block text-sm font-medium text-slate-700"
+            >
+              Nombre de quien recibe
+            </label>
+            <input
+              id="checkout-recipient"
+              value={form.recipientName}
+              onChange={(e) => handleChange("recipientName", e.target.value)}
+              placeholder="Nombre y apellido"
+              className={inputClassName}
+            />
+          </div>
+        )}
+
+        {errors.recipientName && (
+          <p className="mt-2 text-sm font-medium text-red-600">
+            {errors.recipientName}
+          </p>
+        )}
       </div>
 
       <div>
@@ -175,17 +275,17 @@ export default function CheckoutForm({
           htmlFor="checkout-shipping"
           className="mb-2 block text-sm font-medium text-slate-700"
         >
-          Método de envío
+          Metodo de envio
         </label>
         <select
           id="checkout-shipping"
           value={shippingMethod}
           onChange={(e) => onShippingMethodChange(e.target.value)}
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
+          className={inputClassName}
         >
-          <option value="standard">Estándar — Gratis</option>
-          <option value="express">Express — $10</option>
-          <option value="premium">Premium — $20</option>
+          <option value="standard">Estandar - Gratis</option>
+          <option value="express">Express - $10</option>
+          <option value="premium">Premium - $20</option>
         </select>
       </div>
 
@@ -201,7 +301,7 @@ export default function CheckoutForm({
           </div>
 
           <div className="flex items-center justify-between text-slate-600">
-            <span>Envío ({shippingLabel})</span>
+            <span>Envio ({shippingLabel})</span>
             <span>${shippingCost.toLocaleString("es-AR")}</span>
           </div>
 

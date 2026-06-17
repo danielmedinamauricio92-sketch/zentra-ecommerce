@@ -4,7 +4,6 @@ import { OrderDetail } from "../entities/OrderDetail";
 import { AppDataSource } from "../config/dataSource";
 import { CartItem } from "../entities/CartItem";
 import { OrderRepository } from "../repositories/order.repository";
-import { Product } from "../entities/Product";
 import { ProductRepository } from "../repositories/product.repository";
 import { UserRepository } from "../repositories/user.repository";
 import { ClientError } from "../utils/errors";
@@ -31,23 +30,8 @@ export const createOrderService = async (
 
     if (!userF) throw new ClientError("User not found", 404);
 
-    const newOrder = manager.create(OrderRepository.target, {
-      status: "pending_payment",
-      date: new Date(),
-      user: userF,
-      shippingMethod,
-      shippingCost: SHIPPING_COSTS[shippingMethod],
-      customerName: createOrderDto.customerName || userF.name,
-      customerEmail: createOrderDto.customerEmail || userF.email,
-      shippingAddress: createOrderDto.shippingAddress || userF.address,
-      recipientName: createOrderDto.recipientName || userF.name,
-      discount: 0,
-      subtotal: 0,
-      total: 0,
-      items: [],
-    });
-
     let subtotal = 0;
+    const orderItems: OrderDetail[] = [];
 
     for (const item of createOrderDto.products) {
       const product = await manager.findOne(ProductRepository.target, {
@@ -64,29 +48,46 @@ export const createOrderService = async (
       }
 
       const nextStock = product.stock - item.quantity;
-      await manager
-        .createQueryBuilder()
-        .update(Product)
-        .set({ stock: nextStock })
-        .where("id = :id", { id: product.id })
-        .execute();
+      await manager.query("UPDATE products SET stock = $1 WHERE id = $2", [
+        nextStock,
+        product.id,
+      ]);
       product.stock = nextStock;
 
-      const orderDetail = manager.create(OrderDetail, {
+      orderItems.push(manager.create(OrderDetail, {
         product,
         quantity: item.quantity,
-        order: newOrder,
-      });
+      }));
 
       subtotal += Number(product.price) * item.quantity;
-      newOrder.items.push(orderDetail);
     }
 
-    newOrder.subtotal = subtotal;
-    newOrder.total =
-      subtotal + Number(newOrder.shippingCost) - Number(newOrder.discount);
+    const shippingCost = SHIPPING_COSTS[shippingMethod];
+    const discount = 0;
+    const total = subtotal + shippingCost - discount;
+
+    const newOrder = manager.create(OrderRepository.target, {
+      status: "pending_payment",
+      date: new Date(),
+      user: userF,
+      shippingMethod,
+      shippingCost,
+      customerName: createOrderDto.customerName || userF.name,
+      customerEmail: createOrderDto.customerEmail || userF.email,
+      shippingAddress: createOrderDto.shippingAddress || userF.address,
+      recipientName: createOrderDto.recipientName || userF.name,
+      discount,
+      subtotal,
+      total,
+    });
 
     const savedOrder = await manager.save(OrderRepository.target, newOrder);
+    const details = orderItems.map((orderItem) => ({
+      ...orderItem,
+      order: savedOrder,
+    }));
+
+    await manager.save(OrderDetail, details);
     await manager.delete(CartItem, { user: { id: userF.id } });
 
     return manager.findOne(OrderRepository.target, {
