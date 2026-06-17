@@ -10,7 +10,7 @@ const checkLogin = async (req: Request, res: Response, next: NextFunction) => {
     req.headers.authorization;
 
   if (!token) {
-    return next(new ClientError("Token is required"));
+    return next(new ClientError("Token is required", 401));
   }
 
   try {
