@@ -9,7 +9,28 @@ interface HomeProductsSectionProps {
 export function HomeProductsSection({
   products,
 }: HomeProductsSectionProps) {
-  const featuredProducts = products.slice(0, 6);
+  const featuredProductNames = [
+    "iPhone 15 Pro",
+    "Dell XPS 13",
+    "Microsoft Surface Pro 9",
+    "Sony WH-1000XM5",
+    "Fujifilm X-T5",
+    "Xerox B230",
+    "BenQ PD2705U",
+    "Lexar SL500",
+    "Keychron K2",
+    "Realme GT 6",
+    "Framework Laptop 13",
+  ];
+  const featuredByName = featuredProductNames
+    .map((name) => products.find((product) => product.name === name))
+    .filter((product): product is Product => Boolean(product));
+  const fallbackProducts = products.filter(
+    (product) =>
+      !product.isOffer &&
+      !featuredByName.some((featured) => featured.id === product.id)
+  );
+  const featuredProducts = [...featuredByName, ...fallbackProducts].slice(0, 11);
 
   return (
     <section className="pb-12 pt-6 md:pb-16 md:pt-8">

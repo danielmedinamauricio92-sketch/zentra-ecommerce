@@ -4,3 +4,4 @@ node_modules
 !.env.example
 dist
 .next
+front/public/images/generated-products/
