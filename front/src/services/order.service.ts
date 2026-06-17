@@ -4,22 +4,20 @@ import { CartItem } from "@/types/cart-item";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type CreateOrderData = {
-  token: string;
-  userId: number;
   cart: CartItem[];
-  subtotal: number;
   shippingMethod: string;
-  shippingCost: number;
-  discount: number;
-  total: number;
+  customerName: string;
+  customerEmail: string;
+  shippingAddress: string;
+  recipientName: string;
 };
 
-export async function getUserOrders(token: string): Promise<Order[]> {
+export async function getUserOrders(): Promise<Order[]> {
   const res = await fetch(`${API_URL}/users/orders`, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
     },
+    credentials: "include",
   });
 
   if (!res.ok) {
@@ -36,32 +34,29 @@ export async function getUserOrders(token: string): Promise<Order[]> {
 }
 
 export async function createOrder({
-  token,
-  userId,
   cart,
-  subtotal,
   shippingMethod,
-  shippingCost,
-  discount,
-  total,
+  customerName,
+  customerEmail,
+  shippingAddress,
+  recipientName,
 }: CreateOrderData) {
   const res = await fetch(`${API_URL}/orders`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: token,
     },
+    credentials: "include",
     body: JSON.stringify({
-      userId,
       products: cart.map((item) => ({
         productId: item.id,
         quantity: item.quantity,
       })),
-      subtotal,
       shippingMethod,
-      shippingCost,
-      discount,
-      total,
+      customerName,
+      customerEmail,
+      shippingAddress,
+      recipientName,
     }),
   });
 

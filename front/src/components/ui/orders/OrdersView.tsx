@@ -22,7 +22,7 @@ export default function OrdersView() {
   const [reorderedId, setReorderedId] = useState<number | null>(null);
 
   const { addToCart } = useCart();
-  const { user, token } = useUser();
+  const { user, isHydrated } = useUser();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -30,22 +30,28 @@ export default function OrdersView() {
         setLoading(true);
         setError("");
 
-        if (!user || !token) {
-          setError("Debes iniciar sesión para ver tus compras.");
+        if (!user) {
+          setError("Debés iniciar sesión para ver tus compras.");
           return;
         }
 
-        const data = await getUserOrders(token);
+        const data = await getUserOrders();
         setOrders(data);
-      } catch (err: any) {
-        setError(err?.message || "Ocurrió un error al cargar tus compras.");
+      } catch (err: unknown) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Ocurrió un error al cargar tus compras."
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrders();
-  }, [user, token]);
+    if (isHydrated) {
+      fetchOrders();
+    }
+  }, [isHydrated, user]);
 
   const handleBuyAgain = (orderId: number, items: Order["items"]) => {
     items.forEach((item) => {
@@ -96,6 +102,7 @@ export default function OrdersView() {
                 reorderedId={reorderedId}
                 onBuyAgain={handleBuyAgain}
                 groupedProducts={groupedProducts}
+                recipientName={order.recipientName || user?.name || ""}
               />
             );
           })}

@@ -7,21 +7,21 @@ export const createOrder = catchedController(
     const {
       userId,
       products,
-      subtotal,
       shippingMethod,
-      shippingCost,
-      discount,
-      total,
+      customerName,
+      customerEmail,
+      shippingAddress,
+      recipientName,
     } = req.body;
 
     const newOrder = await createOrderService({
       userId,
       products,
-      subtotal,
       shippingMethod,
-      shippingCost,
-      discount,
-      total,
+      customerName,
+      customerEmail,
+      shippingAddress,
+      recipientName,
     });
 
     res.send(newOrder);

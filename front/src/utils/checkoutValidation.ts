@@ -2,12 +2,14 @@ export type CheckoutFormValues = {
   name: string;
   email: string;
   address: string;
+  recipientName?: string;
 };
 
 export type CheckoutFormErrors = {
   name?: string;
   email?: string;
   address?: string;
+  recipientName?: string;
 };
 
 export function validateCheckoutForm(
@@ -18,6 +20,7 @@ export function validateCheckoutForm(
   const name = values.name.trim();
   const email = values.email.trim();
   const address = values.address.trim();
+  const recipientName = values.recipientName?.trim();
 
   if (!name) {
     errors.name = "Ingresá tu nombre";
@@ -35,6 +38,12 @@ export function validateCheckoutForm(
     errors.address = "Ingresá tu dirección";
   } else if (!/[a-zA-Z]/.test(address) || !/[0-9]/.test(address)) {
     errors.address = "Debe contener calle y número";
+  }
+
+  if (recipientName) {
+    if (recipientName.length < 2) {
+      errors.recipientName = "Debe tener al menos 2 letras";
+    }
   }
 
   return errors;

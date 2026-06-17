@@ -55,9 +55,9 @@ export function validateRegisterForm(
   // Teléfono
   if (!phone) {
     errors.phone = "Ingresá tu teléfono";
-  } else if (!/^\d{8,15}$/.test(phone)) {
+  } else if (phone.length  !== 8) {
     errors.phone =
-      "Solo números, entre 8 y 15 dígitos, sin espacios ni símbolos";
+      "Solo números, entre 8  dígitos, sin espacios ni símbolos";
   } else if (/^(\d)\1{7,14}$/.test(phone)) {
     errors.phone =
       "No puede estar formado por el mismo número repetido";

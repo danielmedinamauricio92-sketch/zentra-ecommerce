@@ -23,6 +23,10 @@ export interface Order {
   subtotal: number;
   shippingMethod: string;
   shippingCost: number;
+  customerName?: string;
+  customerEmail?: string;
+  shippingAddress?: string;
+  recipientName?: string;
   discount: number;
   total: number;
 

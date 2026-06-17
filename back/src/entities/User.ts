@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Credential } from "./Credential";
 import { Order } from "./Order";
+import { CartItem } from "./CartItem";
 
 enum Role {
     ADMIN = "admin",
@@ -29,6 +30,12 @@ export class User {
     @Column()
     phone: string;
 
+    @Column({ nullable: true })
+    googleId?: string;
+
+    @Column({ nullable: true })
+    avatar?: string;
+
     @Column({
         type: "enum",
         enum: Role,
@@ -36,11 +43,14 @@ export class User {
     })
     role: Role;
 
-    @OneToOne(() => Credential)
+    @OneToOne(() => Credential, { nullable: true })
     @JoinColumn()
-    credential: Credential;
+    credential?: Credential;
 
     @OneToMany(() => Order, order => order.user)
     orders: Order[];
+
+    @OneToMany(() => CartItem, item => item.user)
+    cartItems: CartItem[];
 }
 

@@ -9,6 +9,7 @@ interface OrderCardProps {
   reorderedId: number | null;
   onBuyAgain: (orderId: number, items: Order["items"]) => void;
   groupedProducts: GroupedOrderProduct[];
+  recipientName?: string;
 }
 
 export function OrderCard({
@@ -17,6 +18,7 @@ export function OrderCard({
   reorderedId,
   onBuyAgain,
   groupedProducts,
+  recipientName,
 }: OrderCardProps) {
   const totalUnits = order.items.reduce(
     (acc, item) => acc + item.quantity,
@@ -53,6 +55,15 @@ export function OrderCard({
                 })}
               </span>
             </p>
+
+            {recipientName && (
+              <p className="mt-2 text-sm text-slate-600">
+                Entrega para:{" "}
+                <span className="font-medium text-slate-700">
+                  {recipientName}
+                </span>
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
@@ -65,9 +76,9 @@ export function OrderCard({
               </p>
             </div>
 
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              Aprobado
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-700">
+              <span className="h-2 w-2 rounded-full bg-amber-500" />
+              Pendiente de coordinación
             </span>
           </div>
         </div>

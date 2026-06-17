@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useUser } from "@/context/UserContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { loginUser } from "@/services/auth.service";
+import { getGoogleLoginUrl, loginUser } from "@/services/auth.service";
 import { LoginCredentials } from "@/types/auth";
 import { validateLoginForm } from "@/utils/loginValidation";
 import { LoginFormErrors } from "@/types/forms";
@@ -58,7 +58,7 @@ export default function LoginForm() {
 
       const data = await loginUser(credentials);
 
-      login(data.user, data.token);
+      login(data.user);
       showToastMessage("Inicio de sesión correcto.");
 
       const redirectTo = searchParams.get("redirect") || "/";
@@ -217,6 +217,13 @@ export default function LoginForm() {
       >
         {isLoading ? "Ingresando..." : "Ingresar"}
       </button>
+
+      <a
+        href={getGoogleLoginUrl()}
+        className="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
+      >
+        Continuar con Google
+      </a>
     </form>
   );
 }

@@ -10,23 +10,28 @@ import {
 import { useUser } from "@/context/UserContext";
 import { Product } from "@/types/product";
 import { CartItem } from "@/types/cart-item";
+import {
+  addCartItem,
+  clearCartItems,
+  getCart,
+  removeCartItem,
+  updateCartItem,
+} from "@/services/cart.service";
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product) => void;
-  removeFromCart: (id: number) => void;
-  clearCart: () => void;
-  increaseQuantity: (id: number) => void;
-  decreaseQuantity: (id: number) => void;
+  addToCart: (product: Product) => Promise<void>;
+  removeFromCart: (id: number) => Promise<void>;
+  clearCart: () => Promise<void>;
+  increaseQuantity: (id: number) => Promise<void>;
+  decreaseQuantity: (id: number) => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { user, isHydrated: isUserHydrated, setToast } = useUser();
-
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
 
   const showToast = (message: string) => {
     setToast({
@@ -35,44 +40,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const runCartAction = async (
+    action: () => Promise<CartItem[]>,
+    successMessage?: string
+  ) => {
+    try {
+      const nextCart = await action();
+      setCart(nextCart);
+
+      if (successMessage) {
+        showToast(successMessage);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudo actualizar el carrito";
+      showToast(message);
+    }
+  };
+
   useEffect(() => {
     if (!isUserHydrated) return;
 
     if (!user) {
-      setCart([]);
-      localStorage.removeItem("cart");
-      setIsHydrated(true);
+      Promise.resolve().then(() => setCart([]));
       return;
     }
 
-    try {
-      const storedCart = localStorage.getItem("cart");
-
-      if (storedCart) {
-        setCart(JSON.parse(storedCart));
-      } else {
+    getCart()
+      .then(setCart)
+      .catch((error) => {
+        console.error("Error al recuperar el carrito:", error);
         setCart([]);
-      }
-    } catch (error) {
-      console.error("Error al recuperar el carrito:", error);
-      setCart([]);
-    } finally {
-      setIsHydrated(true);
-    }
+      });
   }, [user, isUserHydrated]);
 
-  useEffect(() => {
-    if (!isUserHydrated || !isHydrated) return;
-
-    if (!user) {
-      localStorage.removeItem("cart");
-      return;
-    }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart, user, isHydrated, isUserHydrated]);
-
-  const addToCart = (product: Product) => {
+  const addToCart = async (product: Product) => {
     if (!user) {
       showToast("Tenés que iniciar sesión para agregar productos");
       return;
@@ -83,95 +87,55 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const itemInCart = cart.find((item) => item.id === product.id);
-
-    if (itemInCart && itemInCart.quantity >= product.stock) {
-      showToast("No podés agregar más unidades de las disponibles");
-      return;
-    }
-
-    setCart((prev) => {
-      const exists = prev.find((item) => item.id === product.id);
-
-      if (exists) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-
-      return [
-        ...prev,
-        {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.image,
-          stock: product.stock,
-          quantity: 1,
-        },
-      ];
-    });
-
-    showToast("Producto agregado al carrito");
+    await runCartAction(
+      () => addCartItem(product.id),
+      "Producto agregado al carrito"
+    );
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = async (id: number) => {
     if (!user) {
       showToast("Tenés que iniciar sesión");
       return;
     }
 
-    setCart((prev) => prev.filter((item) => item.id !== id));
-    showToast("Producto eliminado del carrito");
+    await runCartAction(
+      () => removeCartItem(id),
+      "Producto eliminado del carrito"
+    );
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
     if (!user) {
       showToast("Tenés que iniciar sesión");
       return;
     }
 
-    setCart([]);
-    showToast("Carrito vaciado");
+    await runCartAction(() => clearCartItems(), "Carrito vaciado");
   };
 
-  const increaseQuantity = (id: number) => {
+  const increaseQuantity = async (id: number) => {
     if (!user) {
       showToast("Tenés que iniciar sesión");
       return;
     }
 
     const item = cart.find((item) => item.id === id);
-
     if (!item) return;
 
-    if (item.quantity >= item.stock) {
-      showToast("No hay más stock disponible");
-      return;
-    }
-
-    setCart((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
+    await runCartAction(() => updateCartItem(id, item.quantity + 1));
   };
 
-  const decreaseQuantity = (id: number) => {
+  const decreaseQuantity = async (id: number) => {
     if (!user) {
       showToast("Tenés que iniciar sesión");
       return;
     }
 
-    setCart((prev) =>
-      prev
-        .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
+    const item = cart.find((item) => item.id === id);
+    if (!item) return;
+
+    await runCartAction(() => updateCartItem(id, item.quantity - 1));
   };
 
   return (

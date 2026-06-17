@@ -6,9 +6,9 @@ export interface CreateOrderProductDto {
 export interface CreateOrderDto {
   userId: number;
   products: CreateOrderProductDto[];
-  subtotal: number;
-  shippingMethod: string;
-  shippingCost: number;
-  discount: number;
-  total: number;
+  shippingMethod?: string;
+  customerName?: string;
+  customerEmail?: string;
+  shippingAddress?: string;
+  recipientName?: string;
 }

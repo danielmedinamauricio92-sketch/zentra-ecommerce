@@ -26,6 +26,18 @@ export class Order {
   @Column({ default: "standard" })
   shippingMethod: string;
 
+  @Column({ default: "" })
+  customerName: string;
+
+  @Column({ default: "" })
+  customerEmail: string;
+
+  @Column({ default: "" })
+  shippingAddress: string;
+
+  @Column({ default: "" })
+  recipientName: string;
+
   @Column("decimal", { precision: 10, scale: 2, default: 0 })
   shippingCost: number;
 

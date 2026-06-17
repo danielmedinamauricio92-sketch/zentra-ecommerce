@@ -11,18 +11,12 @@ import CheckoutCartSummary from "@/components/checkout/CheckoutCartSummary";
 import CheckoutStatus from "@/components/checkout/CheckoutStatus";
 import { calculateSummary } from "@/utils/pricing.utils";
 
-type PersistedUser = {
-  id: number;
-  name?: string;
-  email?: string;
-  address?: string;
-};
-
 type CheckoutSubmitData = {
   name: string;
   email: string;
   address: string;
   shippingMethod: string;
+  recipientName: string;
 };
 
 export default function CheckoutView() {
@@ -33,12 +27,8 @@ export default function CheckoutView() {
     clearCart,
     removeFromCart,
   } = useCart();
-  const { user, token } = useUser();
+  const { user, isHydrated } = useUser();
   const router = useRouter();
-
-  const [persistedUser, setPersistedUser] = useState<PersistedUser | null>(null);
-  const [persistedToken, setPersistedToken] = useState<string>("");
-  const [authChecked, setAuthChecked] = useState(false);
 
   const [orderCompleted, setOrderCompleted] = useState(false);
   const [error, setError] = useState("");
@@ -57,9 +47,6 @@ export default function CheckoutView() {
     premium: "Premium",
   };
 
-  const activeUser = user ?? persistedUser;
-  const activeToken = token || persistedToken;
-
   const shippingCost = shippingCosts[shippingMethod] || 0;
 
   const { subtotal, total } = calculateSummary(
@@ -69,32 +56,11 @@ export default function CheckoutView() {
     shippingCost
   );
 
-  const discount = 0;
-
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("token");
-
-      if (storedUser) {
-        setPersistedUser(JSON.parse(storedUser));
-      }
-
-      if (storedToken) {
-        setPersistedToken(storedToken);
-      }
-    } catch (error) {
-      console.error("Error al recuperar la sesión:", error);
-    } finally {
-      setAuthChecked(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (authChecked && !activeUser) {
+    if (isHydrated && !user) {
       router.push("/login");
     }
-  }, [authChecked, activeUser, router]);
+  }, [isHydrated, user, router]);
 
   useEffect(() => {
     if (isSubmitting || orderCompleted) {
@@ -107,18 +73,14 @@ export default function CheckoutView() {
     email,
     address,
     shippingMethod,
+    recipientName,
   }: CheckoutSubmitData) => {
     if (isSubmitting) return;
 
     setError("");
 
-    if (!activeUser) {
+    if (!user) {
       setError("Debés iniciar sesión para finalizar la compra.");
-      return;
-    }
-
-    if (!activeToken) {
-      setError("No se encontró el token del usuario.");
       return;
     }
 
@@ -130,53 +92,16 @@ export default function CheckoutView() {
     try {
       setIsSubmitting(true);
 
-      const shippingCost = shippingCosts[shippingMethod] || 0;
-
-      const { subtotal, total } = calculateSummary(
-        cart,
-        (item) => item.price,
-        (item) => item.quantity,
-        shippingCost
-      );
-
-      const discount = subtotal > 10000 ? subtotal * 0.1 : 0
-      const finalTotal = total - discount;
-
       await createOrder({
-        token: activeToken,
-        userId: activeUser.id,
         cart,
-        subtotal,
         shippingMethod,
-        shippingCost,
-        discount,
-        total,
+        customerName: name,
+        customerEmail: email,
+        shippingAddress: address,
+        recipientName,
       });
 
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      const existingExtras = JSON.parse(
-        localStorage.getItem("orderExtras") || "[]"
-      );
-
-      const orderExtras = {
-        createdAt: Date.now(),
-        userId: activeUser.id,
-        name,
-        email,
-        address,
-        shippingMethod,
-        subtotal,
-        shippingCost,
-        discount,
-        total,
-        items: cart,
-      };
-
-      localStorage.setItem(
-        "orderExtras",
-        JSON.stringify([...existingExtras, orderExtras])
-      );
 
       clearCart();
       setOrderCompleted(true);
@@ -186,31 +111,21 @@ export default function CheckoutView() {
       }, 1800);
     } catch (err: unknown) {
       console.error("Error al procesar la compra:", err);
-
-      if (err instanceof Error) {
-        if (err.message.includes("Failed to fetch")) {
-          setError("No se pudo conectar con el servidor. Intentá nuevamente.");
-        } else if (
-          err.message.includes("401") ||
-          err.message.toLowerCase().includes("token")
-        ) {
-          setError("Tu sesión venció. Volvé a iniciar sesión.");
-        } else {
-          setError(err.message);
-        }
-      } else {
-        setError("Error al procesar la compra. Intentá nuevamente.");
-      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo procesar la compra. Intentá nuevamente."
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (!authChecked) {
+  if (!isHydrated) {
     return <CheckoutStatus type="loading" />;
   }
 
-  if (!activeUser) {
+  if (!user) {
     return <CheckoutStatus type="redirecting" />;
   }
 
@@ -262,7 +177,7 @@ export default function CheckoutView() {
                 href="/products"
                 className="inline-flex items-center justify-center whitespace-nowrap rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
               >
-                ← Seguir comprando
+                Seguir comprando
               </Link>
             </div>
 
@@ -286,16 +201,16 @@ export default function CheckoutView() {
 
             <CheckoutForm
               defaultValues={{
-                name: activeUser.name || "",
-                email: activeUser.email || "",
-                address: activeUser.address || "",
+                name: user.name || "",
+                email: user.email || "",
+                address: user.address || "",
+                recipientName: "",
               }}
               shippingMethod={shippingMethod}
               shippingLabel={shippingLabels[shippingMethod]}
               shippingCost={shippingCost}
               subtotal={subtotal}
               total={total}
-              discount={discount}
               onShippingMethodChange={setShippingMethod}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}

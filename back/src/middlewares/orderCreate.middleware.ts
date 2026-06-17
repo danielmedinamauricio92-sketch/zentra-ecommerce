@@ -31,6 +31,13 @@ const validateOrderFields = (
     }
   }
 
+  if (
+    req.body.shippingMethod &&
+    !["standard", "express", "premium"].includes(req.body.shippingMethod)
+  ) {
+    return next(new ClientError("Invalid shipping method"));
+  }
+
   next();
 };
 

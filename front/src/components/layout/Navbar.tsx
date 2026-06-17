@@ -31,10 +31,7 @@ export default function Navbar() {
 
           {user && (
             <>
-              <Link
-                href="/dashboard"
-                className="transition hover:text-blue-400"
-              >
+              <Link href="/dashboard" className="transition hover:text-blue-400">
                 Dashboard
               </Link>
 
@@ -79,9 +76,9 @@ export default function Navbar() {
 
           <Link
             href="/cart"
-            className="relative rounded-full bg-white/10 px-3 py-2 transition hover:bg-white/20"
+            className="relative rounded-full bg-white/10 px-3 py-2 text-sm font-semibold transition hover:bg-white/20"
           >
-            🛒
+            Carrito
           </Link>
 
           <Link

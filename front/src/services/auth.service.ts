@@ -16,6 +16,7 @@ export async function registerUser(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(userData),
+    credentials: "include",
   });
 
   const data = await res.json();
@@ -36,6 +37,7 @@ export async function loginUser(
       "Content-Type": "application/json",
     },
     body: JSON.stringify(credentials),
+    credentials: "include",
   });
 
   const data = await res.json();
@@ -45,4 +47,29 @@ export async function loginUser(
   }
 
   return data;
+}
+
+export async function getCurrentUser(): Promise<LoginResponse> {
+  const res = await fetch(`${API_URL}/users/me`, {
+    credentials: "include",
+  });
+
+  const data = await res.json().catch(() => null);
+
+  if (!res.ok) {
+    throw new Error(data?.message || "No hay una sesión activa");
+  }
+
+  return data;
+}
+
+export async function logoutUser(): Promise<void> {
+  await fetch(`${API_URL}/users/logout`, {
+    method: "POST",
+    credentials: "include",
+  });
+}
+
+export function getGoogleLoginUrl() {
+  return `${API_URL}/users/google`;
 }

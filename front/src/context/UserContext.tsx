@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useState,
   ReactNode,
@@ -10,6 +11,7 @@ import {
 import { User } from "@/types/user";
 import { Order } from "@/types/order";
 import { getUserOrders } from "@/services/order.service";
+import { getCurrentUser, logoutUser } from "@/services/auth.service";
 
 interface ToastState {
   show: boolean;
@@ -18,11 +20,10 @@ interface ToastState {
 
 interface UserContextType {
   user: User | null;
-  token: string | null;
   isHydrated: boolean;
   toast: ToastState;
   setToast: (toast: ToastState) => void;
-  login: (user: User, token: string) => void;
+  login: (user: User) => void;
   logout: () => void;
   orders: Order[];
 }
@@ -31,7 +32,6 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [toast, setToast] = useState<ToastState>({
     show: false,
@@ -46,64 +46,49 @@ export function UserProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
-
-    try {
-      if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
-        setToken(storedToken);
-      }
-    } catch (error) {
-      console.error("Error al recuperar la sesión:", error);
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      setOrders([]);
-    } finally {
-      setIsHydrated(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isHydrated && user && token) {
-      getUserOrders(token)
-        .then((orders) => {
-          setOrders(orders);
-        })
-        .catch((error) => {
-          console.error("Error al validar la sesión con el backend:", error);
-          logout();
-        });
-    }
-  }, [isHydrated, user, token]);
-
-  const login = (user: User, token: string) => {
+  const login = (user: User) => {
     setUser(user);
-    setToken(token);
-
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("token", token);
-
     showToast("Sesión iniciada correctamente");
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
+    logoutUser().catch(() => undefined);
     setUser(null);
-    setToken(null);
     setOrders([]);
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("cart");
-
     showToast("Sesión cerrada correctamente");
-  };
+  }, []);
+
+  useEffect(() => {
+    getCurrentUser()
+      .then(({ user }) => {
+        setUser(user);
+      })
+      .catch(() => {
+        setUser(null);
+        setOrders([]);
+      })
+      .finally(() => {
+        setIsHydrated(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated || !user) return;
+
+    getUserOrders()
+      .then((orders) => {
+        setOrders(orders);
+      })
+      .catch((error) => {
+        console.error("Error al validar la sesión con el backend:", error);
+        logout();
+      });
+  }, [isHydrated, user, logout]);
 
   return (
     <UserContext.Provider
       value={{
         user,
-        token,
         isHydrated,
         toast,
         setToast,

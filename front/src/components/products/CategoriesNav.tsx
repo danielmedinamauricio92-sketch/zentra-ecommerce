@@ -8,11 +8,7 @@ type CategoriesNavProps = {
 };
 
 export default function CategoriesNav({ categories }: CategoriesNavProps) {
-  const [activeCategory, setActiveCategory] = useState("");
-
-  useEffect(() => {
-    setActiveCategory(categories[0] || "");
-  }, [categories]);
+  const [activeCategory, setActiveCategory] = useState(categories[0] || "");
 
   useEffect(() => {
     const handleScroll = () => {

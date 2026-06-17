@@ -15,12 +15,13 @@ export default function CartView() {
     clearCart,
   } = useCart();
 
-  const { total } = calculateSummary(
+  const { subtotal, total } = calculateSummary(
     cart,
     (item) => item.price,
     (item) => item.quantity,
     0
   );
+  // Aquí podrías agregar lógica para aplicar descuentos si es necesario
 
   if (!user) {
     return (
@@ -191,14 +192,16 @@ export default function CartView() {
 
             <div className="mb-2 flex justify-between text-sm">
               <span>Subtotal</span>
-              <span>${total.toLocaleString("es-AR")}</span>
+              <span>${subtotal.toLocaleString("es-AR")}</span>
             </div>
 
             <div className="mb-4 flex justify-between text-sm">
               <span>Envío</span>
               <span>Gratis</span>
             </div>
-
+            {/* Aquí podrías mostrar el descuento si es aplicable */}
+            
+          
             <div className="flex justify-between border-t pt-4 text-lg font-bold">
               <span>Total</span>
               <span>${total.toLocaleString("es-AR")}</span>

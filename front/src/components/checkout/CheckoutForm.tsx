@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { validateCheckoutForm } from "@/utils/checkoutValidation";
 
 type CheckoutFormValues = {
   name: string;
   email: string;
   address: string;
+  recipientName: string;
 };
 
 type Props = {
@@ -14,19 +15,20 @@ type Props = {
     name: string;
     email: string;
     address: string;
+    recipientName: string;
   };
   shippingMethod: string;
   shippingLabel: string;
   shippingCost: number;
   subtotal: number;
   total: number;
-  discount: number;
   onShippingMethodChange: (value: string) => void;
   onSubmit: (data: {
     name: string;
     email: string;
     address: string;
     shippingMethod: string;
+    recipientName: string;
   }) => void;
   isSubmitting: boolean;
 };
@@ -40,7 +42,6 @@ export default function CheckoutForm({
   shippingCost,
   subtotal,
   total,
-  discount,
   onShippingMethodChange,
   onSubmit,
   isSubmitting,
@@ -49,18 +50,10 @@ export default function CheckoutForm({
     name: defaultValues.name,
     email: defaultValues.email,
     address: defaultValues.address,
+    recipientName: defaultValues.recipientName,
   });
 
   const [errors, setErrors] = useState<CheckoutFormErrors>({});
-
-  useEffect(() => {
-    setForm((prev) => ({
-      ...prev,
-      name: defaultValues.name,
-      email: defaultValues.email,
-      address: defaultValues.address,
-    }));
-  }, [defaultValues]);
 
   const handleChange = (field: keyof CheckoutFormValues, value: string) => {
     setForm((prev) => ({
@@ -92,6 +85,7 @@ export default function CheckoutForm({
       email: form.email,
       address: form.address,
       shippingMethod,
+      recipientName: form.recipientName,
     });
   };
 
@@ -162,6 +156,22 @@ export default function CheckoutForm({
 
       <div>
         <label
+          htmlFor="checkout-recipient"
+          className="mb-2 block text-sm font-medium text-slate-700"
+        >
+          Enviar a
+        </label>
+        <input
+          id="checkout-recipient"
+          value={form.recipientName}
+          onChange={(e) => handleChange("recipientName", e.target.value)}
+          placeholder="Opcional: nombre de quien recibe"
+          className="w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 outline-none transition focus:border-slate-900"
+        />
+      </div>
+
+      <div>
+        <label
           htmlFor="checkout-shipping"
           className="mb-2 block text-sm font-medium text-slate-700"
         >
@@ -195,14 +205,6 @@ export default function CheckoutForm({
             <span>${shippingCost.toLocaleString("es-AR")}</span>
           </div>
 
-        {discount > 0 && (
-      <div className="flex items-center justify-between">
-      <span>Descuento</span>
-      <span>-${discount.toLocaleString("es-AR")}</span>
-      </div>
-        )}
-
-          
           <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-base font-bold text-slate-900">
             <span>Total</span>
             <span>${total.toLocaleString("es-AR")}</span>
