@@ -9,6 +9,7 @@ import {
 } from "./credential.service";
 import jwt from "jsonwebtoken";
 import {
+  ADMIN_EMAILS,
   FRONTEND_URL,
   GOOGLE_CALLBACK_URL,
   GOOGLE_CLIENT_ID,
@@ -32,6 +33,17 @@ const createSessionToken = (userId: number) =>
 const toPublicUser = (user: User): PublicUser => {
   const { credential, ...publicUser } = user;
   return publicUser;
+};
+
+const syncConfiguredRole = async (user: User): Promise<User> => {
+  const shouldBeAdmin = ADMIN_EMAILS.includes(user.email.toLowerCase());
+
+  if (shouldBeAdmin && user.role !== "admin") {
+    user.role = "admin" as User["role"];
+    return UserRepository.save(user);
+  }
+
+  return user;
 };
 
 export const checkUserExists = async (email: string): Promise<boolean> => {
@@ -68,10 +80,11 @@ export const loginUserService = async (
   if (
     await checkPasswordService(loginUserDto.password, user.credential.password)
   ) {
-    const token = createSessionToken(user.id);
+    const syncedUser = await syncConfiguredRole(user);
+    const token = createSessionToken(syncedUser.id);
 
     return {
-      user: toPublicUser(user),
+      user: toPublicUser(syncedUser),
       token,
     };
   } else {
@@ -86,7 +99,9 @@ export const getUserByIdService = async (
 
   if (!user) throw new ClientError("User not found", 404);
 
-  return toPublicUser(user);
+  const syncedUser = await syncConfiguredRole(user);
+
+  return toPublicUser(syncedUser);
 };
 
 export const updateUserProfileService = async (
@@ -195,7 +210,7 @@ export const loginWithGoogleService = async (
     user.name = user.name || googleUser.name;
   }
 
-  const savedUser = await UserRepository.save(user);
+  const savedUser = await syncConfiguredRole(await UserRepository.save(user));
   const token = createSessionToken(savedUser.id);
 
   return {

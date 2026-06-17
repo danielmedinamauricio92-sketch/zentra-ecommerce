@@ -38,6 +38,12 @@ export default function Navbar() {
               <Link href="/orders" className="transition hover:text-blue-400">
                 Mis compras
               </Link>
+
+              {user.role === "admin" && (
+                <Link href="/admin" className="transition hover:text-blue-400">
+                  Admin
+                </Link>
+              )}
             </>
           )}
         </div>

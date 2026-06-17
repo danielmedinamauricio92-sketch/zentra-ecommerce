@@ -26,6 +26,10 @@ export const GOOGLE_CLIENT_SECRET: string =
 export const GOOGLE_CALLBACK_URL: string =
   process.env.GOOGLE_CALLBACK_URL ||
   `http://localhost:${PORT}/users/google/callback`;
+export const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((email) => email.trim().toLowerCase())
+  .filter(Boolean);
 
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET is required");
