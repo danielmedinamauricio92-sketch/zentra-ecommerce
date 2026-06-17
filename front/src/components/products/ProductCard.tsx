@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Product } from "@/types/product";
 
@@ -12,10 +13,13 @@ export function ProductCard({ product }: ProductCardProps) {
       className="group flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl"
     >
       <div className="mb-5 flex h-56 w-full items-center justify-center rounded-2xl border border-slate-100 bg-linear-to-b from-slate-50 via-white to-slate-50 p-5">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
-          className="max-h-47.5 max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+          width={320}
+          height={240}
+          sizes="(min-width: 1280px) 30vw, (min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+          className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </div>
 

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { registerUser } from "@/services/auth.service";
+import { getGoogleLoginUrl, registerUser } from "@/services/auth.service";
 import { useUser } from "@/context/UserContext";
 import { RegisterData } from "@/types/auth";
 import {
@@ -282,6 +282,13 @@ export default function RegisterForm() {
       >
         {isLoading ? "Registrando..." : "Registrarse"}
       </button>
+
+      <a
+        href={getGoogleLoginUrl()}
+        className="inline-flex w-full items-center justify-center rounded-full border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 shadow-sm transition hover:bg-slate-50"
+      >
+        Continuar con Google
+      </a>
     </form>
   );
 }
