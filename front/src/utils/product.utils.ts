@@ -1,15 +1,18 @@
 import { Product } from "@/types/product";
 
 export const categoryOrder = [
-  "Smartphones",
-  "Laptops",
-  "Tablets",
-  "Headphones",
-  "Cameras",
-  "Printers",
-  "Monitors",
-  "Storage",
-  "Accessories",
+  "Vans",
+  "Puma",
+  "Nike",
+  "Adidas",
+  "New Balance",
+  "Asics",
+  "DC",
+  "Caterpillar",
+  "Louis Vuitton",
+  "Botines",
+  "Ojotas",
+  "Otros",
 ];
 
 export function getCategoryId(categoryName: string) {

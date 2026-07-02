@@ -44,7 +44,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           <div className="flex flex-col justify-between p-8 md:p-10">
             <div>
               <p className="mb-3 text-sm font-semibold text-blue-600">
-                Zentra · Tecnología premium
+                Zentra · Outfit
               </p>
 
               <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
@@ -79,31 +79,31 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
               <p className="mb-8 max-w-xl text-base leading-relaxed text-slate-600">
                 {product.description ||
-                  "Descubrí un producto pensado para ofrecer rendimiento, diseño y una experiencia moderna en tu día a día."}
+                  "Descubrí un producto seleccionado por estilo, comodidad y disponibilidad por talle."}
               </p>
 
               <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-sm font-semibold text-slate-900">
-                    🚚 Envío gratis
+                    Envío a coordinar
                   </p>
                   <p className="mt-1 text-sm text-slate-600">
-                    En compras seleccionadas
+                    Según zona y método elegido
                   </p>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-sm font-semibold text-slate-900">
-                    🛡️ Garantía
+                    Stock por talle
                   </p>
                   <p className="mt-1 text-sm text-slate-600">
-                    Cobertura por 1 año
+                    Disponibilidad actualizada
                   </p>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-sm font-semibold text-slate-900">
-                    🔒 Pago seguro
+                    Compra protegida
                   </p>
                   <p className="mt-1 text-sm text-slate-600">
                     Checkout protegido

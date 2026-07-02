@@ -6,18 +6,15 @@ export default function Footer() {
       <div className="border-b border-slate-800">
         <div className="mx-auto grid max-w-6xl gap-4 px-6 py-5 text-sm sm:grid-cols-3">
           <div className="flex items-center gap-3">
-            <span className="text-lg">🚚</span>
-            <span>Envíos seleccionados sin cargo</span>
+            <span>Envíos a coordinar</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-lg">🔒</span>
-            <span>Pagos seguros y protegidos</span>
+            <span>Compra simple y protegida</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-lg">🛡️</span>
-            <span>Garantía oficial en productos destacados</span>
+            <span>Stock actualizado por talle</span>
           </div>
         </div>
       </div>
@@ -25,15 +22,14 @@ export default function Footer() {
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🛒</span>
             <span className="text-2xl font-bold tracking-tight text-white">
               Zentra
             </span>
           </div>
 
           <p className="mt-4 max-w-sm text-sm leading-7 text-slate-400">
-            Tecnología, diseño y rendimiento en una tienda pensada para una
-            experiencia de compra clara, rápida y confiable.
+            Zapatillas, botines y accesorios Outfit en una experiencia de
+            compra clara, rápida y confiable.
           </p>
         </div>
 

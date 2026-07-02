@@ -6,7 +6,9 @@ interface OffersSectionProps {
 }
 
 export function OffersSection({ products }: OffersSectionProps) {
-  const offers = products.filter((product) => product.isOffer);
+  const offers = products.filter(
+    (product) => product.isActive !== false && product.isOffer
+  );
 
   if (offers.length === 0) {
     return (

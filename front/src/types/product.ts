@@ -8,5 +8,6 @@ export interface Product {
   image: string;
   description?: string;
   isOffer?: boolean;
+  isActive?: boolean;
   category: Category;
 }

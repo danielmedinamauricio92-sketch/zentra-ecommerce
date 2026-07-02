@@ -6,7 +6,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Zentra",
-  description: "Tienda online de tecnología premium",
+  description: "Tienda online de zapatillas, botines y accesorios Outfit",
 };
 
 export default function RootLayout({

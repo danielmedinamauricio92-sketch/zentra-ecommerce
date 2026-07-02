@@ -18,17 +18,17 @@ export function ZentraBanner() {
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 md:px-12 py-12 md:py-14">
           <div className="max-w-xl">
             <span className="inline-flex items-center rounded-full border border-white/15 bg-white/10 backdrop-blur-sm px-4 py-2 text-sm font-semibold text-white shadow-lg">
-              Nueva colección 2026
+              Nueva colección Outfit
             </span>
 
             <h1 className="mt-5 text-white text-4xl md:text-5xl font-extrabold leading-tight tracking-tight drop-shadow-[0_4px_20px_rgba(0,0,0,0.4)]">
-              Tecnología premium
-              <span className="block text-white/92">para tu día a día</span>
+              Calzado urbano
+              <span className="block text-white/92">para todos los días</span>
             </h1>
 
             <p className="mt-4 text-base md:text-lg text-white/78 leading-relaxed max-w-lg">
-              Descubrí dispositivos elegidos por diseño, rendimiento y comodidad
-              para una experiencia moderna y confiable.
+              Descubrí zapatillas, botines y accesorios seleccionados por marca,
+              estilo y talles disponibles.
             </p>
 
             <div className="mt-7 flex flex-col sm:flex-row gap-4">
@@ -50,18 +50,15 @@ export function ZentraBanner() {
 
             <div className="mt-7 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-white/85">
               <div className="flex items-center gap-2 text-sm md:text-base">
-                <span>🚚</span>
-                <span>Envío gratis</span>
+                <span>Envíos a coordinar</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm md:text-base">
-                <span>🛡️</span>
-                <span>Garantía de 1 año</span>
+                <span>Stock por talle</span>
               </div>
 
               <div className="flex items-center gap-2 text-sm md:text-base">
-                <span>🔒</span>
-                <span>Pago seguro</span>
+                <span>Ofertas separadas</span>
               </div>
             </div>
           </div>

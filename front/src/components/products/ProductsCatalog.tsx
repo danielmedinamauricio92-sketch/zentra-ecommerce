@@ -24,7 +24,7 @@ export default function ProductsCatalog({ products }: Props) {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700">
-              Catálogo Zentra
+              Catálogo Outfit
             </span>
 
             <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
@@ -32,9 +32,8 @@ export default function ProductsCatalog({ products }: Props) {
             </h1>
 
             <p className="mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
-              Explorá nuestra selección de tecnología premium con diseño
-              moderno, rendimiento confiable y una experiencia pensada para el
-              día a día.
+              Explorá el catálogo por marca, modelo y talle disponible, con
+              ofertas separadas para que sea más fácil comprar.
             </p>
           </div>
 

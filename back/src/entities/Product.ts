@@ -30,6 +30,9 @@ export class Product {
   @Column({ name: "is0ffer", default: false })
   isOffer: boolean;
 
+  @Column({ default: true })
+  isActive: boolean;
+
   @Column()
   categoryId: number;
 

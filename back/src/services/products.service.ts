@@ -21,7 +21,14 @@ export const getProductsService = async (): Promise<Product[]> => {
 type ProductUpdatePayload = Partial<
   Pick<
     Product,
-    "name" | "description" | "price" | "stock" | "image" | "categoryId" | "isOffer"
+    | "name"
+    | "description"
+    | "price"
+    | "stock"
+    | "image"
+    | "categoryId"
+    | "isOffer"
+    | "isActive"
   >
 >;
 
@@ -83,6 +90,10 @@ export const updateProductService = async (
 
   if (payload.isOffer !== undefined) {
     product.isOffer = Boolean(payload.isOffer);
+  }
+
+  if (payload.isActive !== undefined) {
+    product.isActive = Boolean(payload.isActive);
   }
 
   const savedProduct = await ProductRepository.save(product);

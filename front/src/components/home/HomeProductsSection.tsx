@@ -10,23 +10,28 @@ export function HomeProductsSection({
   products,
 }: HomeProductsSectionProps) {
   const featuredProductNames = [
-    "iPhone 15 Pro",
-    "Dell XPS 13",
-    "Microsoft Surface Pro 9",
-    "Sony WH-1000XM5",
-    "Fujifilm X-T5",
-    "Xerox B230",
-    "BenQ PD2705U",
-    "Lexar SL500",
-    "Keychron K2",
-    "Realme GT 6",
-    "Framework Laptop 13",
+    "VANS KNU NEGRO/BLANCO",
+    "PUMA SUEDE XL",
+    "Nike V2K Beige/Negro",
+    "Dunk Pro Panda",
+    "campus pro negro",
+    "forum blanco/negro",
+    "samba blanco/negro",
+    "NB 530 Beige/Negro",
+    "DC NEGRO",
+    "BORCEGOS CUERO VACUNO (caña alta)",
+    "Botin papi Boca",
   ];
   const featuredByName = featuredProductNames
-    .map((name) => products.find((product) => product.name === name))
+    .map((name) =>
+      products.find(
+        (product) => product.isActive !== false && product.name === name
+      )
+    )
     .filter((product): product is Product => Boolean(product));
   const fallbackProducts = products.filter(
     (product) =>
+      product.isActive !== false &&
       !product.isOffer &&
       !featuredByName.some((featured) => featured.id === product.id)
   );
@@ -44,8 +49,8 @@ export function HomeProductsSection({
         </h1>
 
         <p className="mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
-          Explorá una selección de tecnología premium pensada para diseño,
-          rendimiento y una experiencia moderna en tu día a día.
+          Explorá una selección Outfit con zapatillas, botines y accesorios
+          urbanos, stock real por talle y modelos destacados.
         </p>
       </div>
 

@@ -14,6 +14,7 @@ type ProductDraft = {
   stock: string;
   image: string;
   isOffer: boolean;
+  isActive: boolean;
 };
 
 const toDraft = (product: Product): ProductDraft => ({
@@ -23,6 +24,7 @@ const toDraft = (product: Product): ProductDraft => ({
   stock: String(product.stock),
   image: product.image,
   isOffer: Boolean(product.isOffer),
+  isActive: product.isActive !== false,
 });
 
 export default function AdminView() {
@@ -31,7 +33,9 @@ export default function AdminView() {
   const [drafts, setDrafts] = useState<Record<number, ProductDraft>>({});
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Todas");
-  const [mode, setMode] = useState<"all" | "catalog" | "offers" | "lowStock">("all");
+  const [mode, setMode] = useState<
+    "all" | "active" | "inactive" | "catalog" | "offers" | "lowStock"
+  >("active");
   const [isLoading, setIsLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | null>(null);
   const [message, setMessage] = useState("");
@@ -74,6 +78,8 @@ export default function AdminView() {
         mode === "all" ||
         (mode === "catalog" && !product.isOffer) ||
         (mode === "offers" && product.isOffer) ||
+        (mode === "active" && product.isActive !== false) ||
+        (mode === "inactive" && product.isActive === false) ||
         (mode === "lowStock" && product.stock <= 5);
 
       return matchesQuery && matchesCategory && matchesMode;
@@ -83,6 +89,7 @@ export default function AdminView() {
   const totals = useMemo(
     () => ({
       products: products.length,
+      active: products.filter((product) => product.isActive !== false).length,
       catalog: products.filter((product) => !product.isOffer).length,
       offers: products.filter((product) => product.isOffer).length,
       lowStock: products.filter((product) => product.stock <= 5).length,
@@ -119,6 +126,7 @@ export default function AdminView() {
         stock: Number(draft.stock),
         image: draft.image,
         isOffer: draft.isOffer,
+        isActive: draft.isActive,
       });
 
       setProducts((current) =>
@@ -172,6 +180,7 @@ export default function AdminView() {
     <AdminShell title="Panel admin">
       <div className="mb-6 grid gap-3 md:grid-cols-4">
         <Metric label="Productos" value={totals.products} />
+        <Metric label="Activos" value={totals.active} />
         <Metric label="Catalogo" value={totals.catalog} />
         <Metric label="Ofertas" value={totals.offers} />
         <Metric label="Stock bajo" value={totals.lowStock} />
@@ -204,6 +213,8 @@ export default function AdminView() {
             className="h-11 rounded-xl border border-slate-300 px-4 text-sm outline-none transition focus:border-blue-500"
           >
             <option value="all">Todos</option>
+            <option value="active">Activos</option>
+            <option value="inactive">Inactivos</option>
             <option value="catalog">Catalogo</option>
             <option value="offers">Ofertas</option>
             <option value="lowStock">Stock bajo</option>
@@ -301,6 +312,18 @@ export default function AdminView() {
                       className="h-4 w-4"
                     />
                     Oferta
+                  </label>
+
+                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={draft.isActive}
+                      onChange={(event) =>
+                        updateDraft(product.id, "isActive", event.target.checked)
+                      }
+                      className="h-4 w-4"
+                    />
+                    Activo
                   </label>
 
                   <span className="text-xs font-semibold uppercase text-slate-400">

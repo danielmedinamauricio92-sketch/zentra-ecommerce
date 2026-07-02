@@ -19,7 +19,10 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export type ProductUpdateData = Partial<
-  Pick<Product, "name" | "description" | "price" | "stock" | "image" | "isOffer">
+  Pick<
+    Product,
+    "name" | "description" | "price" | "stock" | "image" | "isOffer" | "isActive"
+  >
 > & {
   categoryId?: number;
 };

@@ -43,8 +43,8 @@ export default function OffersView() {
         </h1>
 
         <p className="mt-3 max-w-2xl text-base text-slate-600 md:text-lg">
-          Descubrí una selección especial de productos premium con precios
-          destacados por tiempo limitado.
+          Descubrí ofertas separadas del catálogo principal, con modelos Outfit
+          seleccionados y stock disponible.
         </p>
       </div>
 

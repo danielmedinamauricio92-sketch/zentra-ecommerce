@@ -4,7 +4,9 @@ import ProductsCatalog from "@/components/products/ProductsCatalog";
 
 export default async function ProductsView() {
   const products = await getProducts();
-  const visibleProducts = products.filter((product) => !product.isOffer);
+  const visibleProducts = products.filter(
+    (product) => product.isActive !== false && !product.isOffer
+  );
 
   if (visibleProducts.length === 0) {
     return (
