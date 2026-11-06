@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zentra — Frontend
 
-## Getting Started
+Frontend de Zentra, e-commerce de calzado urbano. Aplicación Next.js 16
+(App Router) con React 19, TypeScript y Tailwind CSS 4.
 
-First, run the development server:
+## Stack
+
+- Next.js 16, React 19, TypeScript
+- Tailwind CSS 4
+- React Compiler (activado en `next.config.ts`)
+
+## Desarrollo
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # ver variables abajo
+npm ci
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Variables de entorno
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Ver `front/.env.example`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NEXT_PUBLIC_API_URL`: URL de la API para el navegador. Por defecto `/api`,
+  que `next.config.ts` redirige al backend con rewrites.
+- `BACKEND_URL`: URL del backend para los rewrites del servidor. Por defecto
+  `https://zentra-backend-production-8613.up.railway.app` (definido en
+  `next.config.ts` y en `src/services/product.service.ts`).
 
-## Learn More
+El backend corre por separado desde `../back` (Express + TypeORM +
+PostgreSQL). Ver el README raíz y `../DEPLOYMENT.md`.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev          # servidor de desarrollo
+npm run build        # build de producción (Next.js)
+npm run start        # sirve el build
+npm run lint         # ESLint
+npm test             # Vitest (tests unitarios, `vitest run`)
+npm run test:watch   # Vitest en modo interactivo
+npm run test:demos   # alias de `npm test`, por compatibilidad con la CI anterior
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tests
 
-## Deploy on Vercel
+Tests unitarios con Vitest para funciones puras en
+`src/utils/__tests__/`: precios, productos/categorías, validaciones de login,
+registro y checkout, y completitud del perfil. No requieren base de datos ni
+servidor. Ver el README raíz para el alcance y los pendientes.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Estructura
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```txt
+src/
+├── app/         # Rutas: products, cart, checkout, orders, login, register, admin, dashboard…
+├── components/  # Componentes de UI
+├── services/    # Llamadas a la API (usan NEXT_PUBLIC_API_URL / BACKEND_URL)
+├── types/       # Tipos: product, order, forms, user, category…
+└── utils/       # Funciones puras testeadas (pricing, product, validaciones, profile)
+```

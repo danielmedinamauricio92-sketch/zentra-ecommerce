@@ -37,13 +37,13 @@ jobs:
         run: npm ci
       - name: Lint
         run: npm run lint
-      - name: Run demo tests when available
-        run: npm run test:demos --if-present
+      - name: Test
+        run: npm test
       - name: Build
         run: npm run build
 
   backend:
-    name: Backend - TypeScript build
+    name: Backend - tests and TypeScript build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     defaults:
@@ -62,5 +62,7 @@ jobs:
           cache-dependency-path: back/package-lock.json
       - name: Install dependencies
         run: npm ci
+      - name: Test
+        run: npm test
       - name: Build
         run: npm run build

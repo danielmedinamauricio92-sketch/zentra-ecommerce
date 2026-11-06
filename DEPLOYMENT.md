@@ -64,9 +64,16 @@ npm run build
 Required variables:
 
 ```env
-NEXT_PUBLIC_API_URL=https://your-railway-domain.up.railway.app
 NEXT_PUBLIC_API_URL=https://zentra-backend-production-8613.up.railway.app
 ```
+
+> **Pendiente — URL del frontend vigente:** `FRONTEND_URL` en el backend
+> (arriba) debe coincidir con el proyecto Vercel vigente. Hoy `DEPLOYMENT.md`
+> usa `https://zentra-blond-eight.vercel.app`, distinta de la demo
+> `https://zentra-store-daniel.vercel.app/products`, que dio timeout al
+> intentar leerla. No se afirma aquí cuál es la vigente: confirmarla con el
+> dueño del proyecto y actualizar `FRONTEND_URL` (y este archivo) en
+> consecuencia.
 
 ## Google OAuth
 
