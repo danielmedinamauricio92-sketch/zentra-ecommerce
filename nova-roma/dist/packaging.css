@@ -1,0 +1,85 @@
+.detail-comparison {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 8px;
+  padding: 16px 10px 12px;
+}
+.detail-comparison figure { min-width: 0; margin: 0; }
+.detail-comparison figcaption {
+  display: grid;
+  gap: 5px;
+  padding: 12px 4px;
+  text-align: center;
+  font-size: 11px;
+}
+.detail-comparison figcaption span { font-size: 10px; }
+.detail-original, .roma-packaging {
+  height: 230px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff8fc;
+}
+.detail-original img { object-fit: contain; padding: 8px; }
+.roma-packaging {
+  position: relative;
+  isolation: isolate;
+  container-type: inline-size;
+  background: radial-gradient(ellipse at 50% 25%, #fff8fc, #f3c9de 72%, #e5b5d7);
+}
+.roma-carton {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  left: 10%;
+  bottom: 15%;
+  width: 51%;
+  height: 72%;
+  padding: 6px;
+  border: 3px var(--roma-frame) #e4bd83;
+  background: linear-gradient(120deg, #ffffff38, transparent 50%, #0005), var(--roma-carton);
+  color: #fff8ed;
+  font: 700 clamp(8px, 6cqi, 14px) Georgia, serif;
+  letter-spacing: .06em;
+  text-align: center;
+  box-shadow: -5px 4px 0 color-mix(in srgb, var(--roma-carton), #180a1b 38%), 0 9px 13px #39112745;
+  transform: skewY(-4deg);
+}
+.roma-carton small { font: 500 clamp(7px, 5cqi, 11px) 'DM Sans', sans-serif; overflow-wrap: anywhere; }
+.roma-bottle {
+  position: absolute;
+  right: 8%;
+  bottom: 9%;
+  width: min(57%, var(--roma-width));
+  display: grid;
+  justify-items: center;
+  filter: drop-shadow(0 9px 7px #3817284d);
+}
+.roma-cap {
+  height: 34px;
+  width: 47%;
+  border: 1px solid #f7d69e;
+  border-radius: var(--roma-cap);
+  background: linear-gradient(90deg, #714423, #e5ba7c 21%, #fff2c7 47%, #ca9453 78%, #85532e);
+}
+.roma-glass {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: var(--roma-height);
+  border-radius: var(--roma-shape);
+  border: 2px solid #fff6e7b8;
+  box-shadow: inset 4px 0 8px #fffe, inset -5px -7px 10px #200a2659;
+  background: linear-gradient(110deg, #fff9 1%, #fff1 22%, transparent 72%, #fff7), var(--roma-glass);
+}
+.roma-glass span {
+  max-width: 88%;
+  padding: 5px 4px;
+  border: 1px solid #e7c28a;
+  background: #241327;
+  color: #fff5dc;
+  text-align: center;
+  font: 700 clamp(7px, 5cqi, 11px) Georgia, serif;
+}
