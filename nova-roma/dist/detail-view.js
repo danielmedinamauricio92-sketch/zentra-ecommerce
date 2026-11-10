@@ -3,7 +3,7 @@
  const categoryImage={Femeninas:'femeninas',Masculinas:'masculinas',Unisex:'unisex'};
  const list=values=>values.map(value=>`<span>${escape(value)}</span>`).join('');
  window.renderRomaDetails=(product,profile={})=>{
-  const image=product.detailImage||product.image;
+  const image='assets/presentacion-nova-roma.png';
   const notes=profile.notes||{};
   const groups=[['Salida','01',notes.top],['Corazón','02',notes.heart],['Fondo','03',notes.base]].filter(([, ,values])=>values?.length);
   const keyNotes=notes.key||[];
@@ -11,7 +11,7 @@
   const sources=(profile.sources||[]).filter(source=>/^https:\/\//.test(source.url));
   return `<button class="dialog-close" aria-label="Cerrar detalle">×</button>
    <div class="detail-shell" data-category="${escape(product.category)}">
-    <div class="detail-visual"><span class="detail-edition">LA ESENCIA ROMA / ${String(product.id).padStart(3,'0')}</span><img class="detail-hero" src="${image}" alt="Imagen ilustrativa de ${escape(product.name)}" loading="eager"><span class="detail-image-note">Imagen ilustrativa de referencia</span><div class="inspiration-reference"><img src="${escape(product.image)}" alt="Frasco de referencia de ${escape(product.name)}"><div><span>REFERENCIA OLFATIVA</span><p>${escape(product.name)}</p><small>${escape(product.brand)}</small></div></div></div>
+    <div class="detail-visual"><span class="detail-edition">LA ESENCIA ROMA / ${String(product.id).padStart(3,'0')}</span><img class="detail-hero" src="${image}" alt="Presentación ilustrativa de Nova Roma Parfums: frasco y caja propios de la marca" loading="eager"><span class="detail-image-note">Presentación Nova Roma · Imagen ilustrativa</span><div class="inspiration-reference"><div><span>INSPIRACIÓN OLFATIVA</span><p>${escape(product.name)}</p><small>${escape(product.brand)}</small></div></div></div>
     <div class="detail-content"><p class="eyebrow">ROMA BY BARBIES · ${escape(product.category)}</p><span class="detail-intro">Inspirada en</span><h2 id="perfume-detail-title">${escape(product.name)}</h2><p class="detail-reference-brand">${escape(product.brand)}</p><div class="detail-pills"><span>55 ml</span><span>Fragancia inspirada</span></div>
     <p class="detail-description">${escape(profile.description||'Una nueva forma de llevar tu esencia. Descubrí nuestra interpretación de esta fragancia.')}</p>
     ${profile.family?`<section class="olfactory-family"><span aria-hidden="true">✧</span><div><p>FAMILIA OLFATIVA DE REFERENCIA</p><h3>${escape(profile.family)}</h3></div></section>`:''}

@@ -21,4 +21,7 @@ for(let id=1;id<=122;id++){
 for(let id=1;id<=122;id++)assert(fs.statSync(`dist/assets/perfumes/${String(id).padStart(2,'0')}.jpg`).size>10000);
 const html=context.window.renderRomaDetails({id:42,name:'Baccarat Rouge 540',brand:'Maison Francis Kurkdjian',category:'Unisex',image:'assets/perfumes/42.jpg'},profiles[42]);
 assert(html.includes('55 ml'));assert(html.includes('Inspirada en'));assert(!html.includes('detail-pending'));
+assert(html.includes('assets/presentacion-nova-roma.png'),'La ficha debe mostrar la presentación Nova Roma');
+assert(!html.includes('src="assets/perfumes/42.jpg"'),'La ficha no debe mostrar el empaque original');
+assert(fs.statSync('dist/assets/presentacion-nova-roma.png').size>10000,'Falta la imagen de presentación Roma');
 console.log(`OK: 122 fichas, ${122-unresolved.length} perfiles verificados; variantes pendientes: ${unresolved.join(', ')||'ninguna'}.`);
