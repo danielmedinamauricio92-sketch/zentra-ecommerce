@@ -1,0 +1,9 @@
+node_modules/
+.sites-local/
+*.tar.gz
+output/
+.qa/
+.vercel/
+.openai/
+
+.vercel

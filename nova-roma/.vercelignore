@@ -1,0 +1,8 @@
+.openai
+.qa
+output
+research
+node_modules
+*.tar.gz
+*-manifest.json
+*-prompts.md
